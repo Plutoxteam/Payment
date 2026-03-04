@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PLUTO X TEAM - Payment</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Import Map untuk Firebase v9 -->
+    <script type="importmap">
+        {
+            "imports": {
+                "firebase/app": "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js",
+                "firebase/database": "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"
+            }
+        }
+    </script>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">PLUTO X TEAM</div>
+            <div class="nav-menu">
+                <a href="index.html" class="nav-link active">Beranda</a>
+                <a href="dashboard.html" class="nav-link">Cek Status</a>
+                <a href="admin.html" class="nav-link">Admin</a>
+            </div>
+        </div>
+
+        <h1>Pembayaran Langganan Aplikasi</h1>
+        
+        <!-- Form Pemesanan -->
+        <div class="form-section">
+            <h2>Form Pemesanan</h2>
+            <form id="paymentForm">
+                <div class="form-group">
+                    <label for="nama">Nama Lengkap:</label>
+                    <input type="text" id="nama" placeholder="Masukkan nama lengkap" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="deviceId">Device ID (Copy dari Aplikasi):</label>
+                    <input type="text" id="deviceId" placeholder="Contoh: 62BC6A3C44133492" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="plan">Pilih Paket:</label>
+                    <select id="plan" required>
+                        <option value="">-- Pilih Durasi --</option>
+                        <option value="1">1 Bulan - Rp 50.000</option>
+                        <option value="2">2 Bulan - Rp 100.000</option>
+                        <option value="3">3 Bulan - Rp 150.000</option>
+                        <option value="4">4 Bulan - Rp 200.000</option>
+                        <option value="5">5 Bulan - Rp 250.000</option>
+                        <option value="6">6 Bulan - Rp 300.000</option>
+                        <option value="7">7 Bulan - Rp 350.000</option>
+                        <option value="8">8 Bulan - Rp 400.000</option>
+                        <option value="9">9 Bulan - Rp 450.000</option>
+                        <option value="10">10 Bulan - Rp 500.000</option>
+                        <option value="11">11 Bulan - Rp 550.000</option>
+                        <option value="12">12 Bulan - Rp 600.000</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">Buat Pembayaran</button>
+            </form>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="hidden text-center">
+            <div class="spinner"></div>
+            <p>Memproses...</p>
+        </div>
+
+        <!-- Alert Container -->
+        <div id="alertContainer"></div>
+
+        <!-- QRIS Section -->
+        <div id="qrSection" class="qr-section hidden">
+            <h2>Scan QRIS untuk Membayar</h2>
+            
+            <!-- TAMPILAN QRIS STATIS ANDA -->
+            <div class="qris-static-box">
+                <img src="QRStatis-1767692814093636.jpg" alt="QRIS PLUTO X TEAM" style="max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+                <div style="margin-top: 15px; font-weight: bold; color: #333;">
+                    <p>NMD: ID1026470112099</p>
+                    <p>Dicetak oleh: 93600815</p>
+                </div>
+            </div>
+            
+            <div class="payment-info">
+                <p><strong>Total Pembayaran:</strong> Rp <span id="totalAmount">0</span></p>
+                <p><strong>Status:</strong> <span id="paymentStatus" style="color: #ecc94b;">Menunggu Pembayaran</span></p>
+                <p><strong>ID Transaksi:</strong> <span id="transactionId"></span></p>
+                
+                <div class="payment-instruction">
+                    <h3>Cara Pembayaran:</h3>
+                    <ol>
+                        <li>Buka aplikasi mobile banking atau e-wallet Anda</li>
+                        <li>Pilih menu scan QRIS / QR Code</li>
+                        <li>Scan QR code PLUTO X TEAM di atas</li>
+                        <li>Masukkan jumlah pembayaran: <strong>Rp <span id="amountInstruction"></span></strong></li>
+                        <li>Konfirmasi pembayaran</li>
+                        <li>Tunggu verifikasi otomatis</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Section -->
+        <div id="successSection" class="success-section hidden">
+            <h2>✅ Pembayaran Berhasil!</h2>
+            <div class="credentials">
+                <h3>Informasi Login Aplikasi:</h3>
+                <p><strong>Username:</strong> <span id="successUsername"></span></p>
+                <p><strong>Device ID:</strong> <span id="successDeviceId"></span></p>
+                <p><strong>Password:</strong> <span id="successPassword"></span></p>
+                <p><strong>Masa Aktif:</strong> <span id="successExpiry"></span></p>
+            </div>
+            <div class="button-group">
+                <button onclick="copyCredentials()" class="btn btn-success">Salin Informasi</button>
+                <a href="dashboard.html?username=" class="btn btn-primary" id="cekStatusLink">Cek Status</a>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getDatabase, ref, set, update, onValue, get, off } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3N6C6x8TpMERwL-K_KhP4W2gEkMKy8Q8",
+            authDomain: "sidian-4e9ef.firebaseapp.com",
+            databaseURL: "https://sidian-4e9ef-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "sidian-4e9ef",
+            storageBucket: "sidian-4e9ef.firebasestorage.app",
+            messagingSenderId: "29444316676",
+            appId: "1:29444316676:web:fc070f72fbe03432a49f51"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        
+        console.log('✅ Firebase Connected');
+
+        const PRICE_PER_MONTH = 50000;
+
+        document.getElementById('paymentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            try {
+                showLoading(true);
+                
+                const nama = document.getElementById('nama').value;
+                const deviceId = document.getElementById('deviceId').value;
+                const planMonths = parseInt(document.getElementById('plan').value);
+                
+                if (!nama || !deviceId || !planMonths) {
+                    throw new Error('Semua field harus diisi');
+                }
+                
+                const totalAmount = planMonths * PRICE_PER_MONTH;
+                
+                // Generate username dari nama (ini akan menjadi DeviceID di database)
+                const generatedUsername = nama.toLowerCase().replace(/\s+/g, '') + Math.floor(Math.random() * 1000);
+                const password = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-2).toUpperCase();
+                
+                const expiredDate = new Date();
+                expiredDate.setMonth(expiredDate.getMonth() + planMonths);
+                
+                const day = expiredDate.getDate().toString().padStart(2, '0');
+                const month = (expiredDate.getMonth() + 1).toString().padStart(2, '0');
+                const year = expiredDate.getFullYear();
+                const expiryFormatted = `${day}/${month}/${year}`;
+                
+                const transactionId = 'TRX' + Date.now() + Math.random().toString(36).substr(2, 5).toUpperCase();
+                
+                const transaction = {
+                    id: transactionId,
+                    nama: nama,
+                    deviceId: deviceId,
+                    planMonths: planMonths,
+                    amount: totalAmount,
+                    status: 'pending',
+                    username: generatedUsername,
+                    password: password,
+                    expiryDate: expiryFormatted,
+                    createdAt: new Date().toISOString()
+                };
+                
+                await set(ref(database, 'transactions/' + transactionId), transaction);
+                console.log('✅ Transaksi tersimpan:', transactionId);
+                
+                document.getElementById('qrSection').classList.remove('hidden');
+                document.getElementById('totalAmount').textContent = formatRupiah(totalAmount);
+                document.getElementById('amountInstruction').textContent = formatRupiah(totalAmount);
+                document.getElementById('transactionId').textContent = transactionId;
+                
+                checkPaymentStatus(transactionId);
+                
+                showLoading(false);
+                
+            } catch (error) {
+                showLoading(false);
+                showAlert('error', error.message);
+                console.error('❌ Error:', error);
+            }
+        });
+
+        function formatRupiah(amount) {
+            return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function checkPaymentStatus(transactionId) {
+            const statusRef = ref(database, 'transactions/' + transactionId + '/status');
+            
+            onValue(statusRef, function(snapshot) {
+                const status = snapshot.val();
+                const statusElement = document.getElementById('paymentStatus');
+                
+                if (status === 'paid') {
+                    statusElement.innerHTML = 'Pembayaran Diverifikasi ✅';
+                    statusElement.style.color = '#48bb78';
+                    
+                    updateUserData(transactionId);
+                    
+                    setTimeout(function() {
+                        document.getElementById('qrSection').classList.add('hidden');
+                        document.getElementById('successSection').classList.remove('hidden');
+                        loadTransactionData(transactionId);
+                    }, 1500);
+                    
+                    off(statusRef);
+                }
+            });
+        }
+
+        async function updateUserData(transactionId) {
+            try {
+                const transRef = ref(database, 'transactions/' + transactionId);
+                const snapshot = await get(transRef);
+                const transaction = snapshot.val();
+                
+                // FORMAT SESUAI CONTOH:
+                // DeviceID diisi Username, Username diisi DeviceID
+                const userData = {
+                    DeviceID: transaction.username,      // Username jadi DeviceID
+                    ID: transaction.username,            // ID juga pakai Username
+                    Username: transaction.deviceId,      // DeviceID jadi Username
+                    Password: transaction.password,
+                    Expiry: transaction.expiryDate
+                };
+                
+                // Ambil data Users yang sudah ada
+                const usersRef = ref(database, 'Users');
+                const usersSnap = await get(usersRef);
+                let users = usersSnap.val() || [];
+                
+                // Cek apakah user sudah ada (berdasarkan Username = deviceId)
+                const existingIndex = users.findIndex(u => u.Username === transaction.deviceId);
+                
+                if (existingIndex >= 0) {
+                    // Update data yang sudah ada
+                    users[existingIndex] = userData;
+                } else {
+                    // Tambah data baru
+                    users.push(userData);
+                }
+                
+                // Simpan kembali ke Firebase
+                await set(usersRef, users);
+                
+                // Update status transaksi
+                await update(ref(database, 'transactions/' + transactionId), {
+                    status: 'paid',
+                    verifiedAt: new Date().toISOString()
+                });
+                
+                console.log('✅ User data saved dengan format terbalik');
+                console.log('📦 Data tersimpan:', userData);
+                
+            } catch (error) {
+                console.error('❌ Error saving user:', error);
+            }
+        }
+
+        async function loadTransactionData(transactionId) {
+            const transRef = ref(database, 'transactions/' + transactionId);
+            const snapshot = await get(transRef);
+            const transaction = snapshot.val();
+            
+            if (transaction) {
+                // Tampilkan dengan format terbalik sesuai database
+                document.getElementById('successUsername').textContent = transaction.username;  // Username
+                document.getElementById('successDeviceId').textContent = transaction.deviceId;  // Device ID
+                document.getElementById('successPassword').textContent = transaction.password;
+                document.getElementById('successExpiry').textContent = transaction.expiryDate;
+                
+                // Link ke dashboard pakai Username (yang benar-benar Username)
+                document.getElementById('cekStatusLink').href = 'dashboard.html?username=' + transaction.username;
+            }
+        }
+
+        window.copyCredentials = function() {
+            const username = document.getElementById('successUsername').textContent;
+            const deviceId = document.getElementById('successDeviceId').textContent;
+            const password = document.getElementById('successPassword').textContent;
+            const expiry = document.getElementById('successExpiry').textContent;
+            
+            const text = `PLUTO X TEAM\n══════════════\n👤 Username  : ${username}\n📱 Device ID : ${deviceId}\n🔑 Password  : ${password}\n📅 Masa Aktif : ${expiry}`;
+            
+            navigator.clipboard.writeText(text);
+            showAlert('success', '✅ Tersalin!');
+        };
+
+        function showLoading(show) {
+            document.getElementById('loading').classList.toggle('hidden', !show);
+        }
+
+        function showAlert(type, message) {
+            const container = document.getElementById('alertContainer');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            container.innerHTML = '';
+            container.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 3000);
+        }
+
+        window.simulatePayment = function(transactionId) {
+            update(ref(database, 'transactions/' + transactionId), { status: 'paid' });
+        };
+    </script>
+</body>
+</html>

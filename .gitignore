@@ -1,0 +1,12 @@
+firebase-debug.log
+.firebase/
+.env
+.env.local
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
