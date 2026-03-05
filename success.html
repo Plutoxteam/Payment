@@ -375,16 +375,16 @@
     </div>
     
     <script>
-        // Ambil data dari URL (yang dikirim DOKU)
-        function getUrlParams() {
-            const params = new URLSearchParams(window.location.search);
-            return {
-                invoice: params.get('invoice') || 'INV-' + Math.random().toString(36).substring(2,10),
-                amount: params.get('amount') || '50000',
-                phone: params.get('phone') || params.get('customer_phone') || '62xxxxxxxxxx',
-                name: params.get('name') || 'Customer'
-            };
-        }
+        // Di success.html, ganti fungsi getUrlParams() menjadi:
+function getUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        invoice: params.get('invoice') || params.get('order_id') || 'INV-' + Date.now(),
+        amount: params.get('amount') || params.get('gross_amount') || '50000',
+        phone: params.get('phone') || params.get('customer_phone') || params.get('wa') || '628xxxxxxxxx',
+        name: params.get('name') || params.get('customer_name') || 'Pelanggan'
+    };
+}
         
         // Format Rupiah
         function formatRupiah(amount) {
