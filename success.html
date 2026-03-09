@@ -296,10 +296,6 @@
                 <span class="info-label">Nomor WA</span>
                 <span class="info-value" id="phoneDisplay"></span>
             </div>
-            <div class="info-row">
-                <span class="info-label">Nama</span>
-                <span class="info-value" id="customerName"></span>
-            </div>
         </div>
         
         <div class="key-card">
@@ -357,51 +353,52 @@
         const WHAPI_TOKEN = 'dUtoaA65nf39YiR4oJweRlGP5fCPZXek';
         
         /**
-         * Membersihkan nomor telepon dari karakter non-digit
+         * Bersihin nomor dari karakter non-digit
          */
-        function cleanPhoneNumber(rawPhone) {
-            if (!rawPhone) return '';
-            // Hapus semua karakter kecuali angka
-            return rawPhone.replace(/\D/g, '');
+        function cleanPhone(phone) {
+            if (!phone) return '';
+            return phone.replace(/\D/g, '');
         }
 
         /**
-         * Validasi nomor telepon (minimal 10 digit, tidak kosong)
+         * Ambil data dari URL dan Firebase
          */
-        function isValidPhone(phone) {
-            return phone && phone.length >= 10;
-        }
-
-        /**
-         * Mendapatkan data dari URL DOKU
-         * - name: dari field default DOKU
-         * - Nomor WA: dari custom field
-         */
-        function getUrlParams() {
+        async function getTransactionData() {
             const params = new URLSearchParams(window.location.search);
             
-            // Ambil nomor WA dari custom field
-            const rawPhone = params.get('Nomor WA') || params.get('phone') || params.get('customer_phone') || '';
+            // Invoice dari URL
+            const invoice = params.get('invoice') || params.get('order_id');
             
-            // Ambil nama dari field default DOKU
-            const name = params.get('name') || params.get('customer_name') || 'Pelanggan';
+            if (!invoice) {
+                console.error('Invoice tidak ditemukan di URL');
+                return null;
+            }
             
-            // Bersihkan nomor WA
-            const cleanPhone = cleanPhoneNumber(rawPhone);
+            // Coba ambil dari Firebase dulu (webhook sudah simpan)
+            const snapshot = await firebase.database().ref('transactions/' + invoice).once('value');
+            const fbData = snapshot.val();
             
-            console.log('📦 Data dari URL:', {
-                invoice: params.get('invoice') || params.get('order_id'),
-                amount: params.get('amount') || params.get('gross_amount'),
-                rawPhone: rawPhone,
-                cleanPhone: cleanPhone,
-                name: name
-            });
-
+            if (fbData && fbData.phone) {
+                console.log('✅ Data dari Firebase:', fbData);
+                return {
+                    invoice: invoice,
+                    amount: fbData.amount || params.get('amount') || '50000',
+                    phone: fbData.phone
+                };
+            }
+            
+            // Fallback ke URL (kalo webhook belum masuk)
+            console.log('⚠️ Data Firebase kosong, pake URL');
+            let phone = params.get('Nomor WA') || 
+                        params.get('custom_field2') || 
+                        params.get('phone') || 
+                        params.get('customer_phone') || 
+                        '';
+            
             return {
-                invoice: params.get('invoice') || params.get('order_id') || 'INV-' + Date.now(),
+                invoice: invoice,
                 amount: params.get('amount') || params.get('gross_amount') || '50000',
-                phone: cleanPhone,
-                name: name
+                phone: cleanPhone(phone)
             };
         }
         
@@ -422,18 +419,7 @@
             });
         }
         
-        // Format tanggal expire (30 hari dari sekarang)
-        function getExpireDate() {
-            const date = new Date();
-            date.setDate(date.getDate() + 30);
-            return date.toLocaleDateString('id-ID', { 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
-            });
-        }
-        
-        // Fungsi untuk mengubah 62xxx ke 08xxx (untuk tampilan)
+        // Format nomor untuk tampilan (08xxx)
         function formatPhoneLocal(phone) {
             if (!phone) return 'Nomor tidak tersedia';
             
@@ -448,13 +434,13 @@
             return '0' + cleaned;
         }
         
-        // Format nomor WA untuk API (08 ke 62)
+        // Format nomor untuk API (62xxx)
         function formatPhoneApi(phone) {
             let cleaned = phone.replace(/\D/g, '');
             if (cleaned.startsWith('0')) {
-                cleaned = '62' + cleaned.substring(1);
+                return '62' + cleaned.substring(1);
             } else if (!cleaned.startsWith('62')) {
-                cleaned = '62' + cleaned;
+                return '62' + cleaned;
             }
             return cleaned;
         }
@@ -477,28 +463,24 @@
                     const notification = document.getElementById('copyNotification');
                     notification.classList.add('show');
                     setTimeout(() => notification.classList.remove('show'), 2000);
-                }).catch(() => alert('Gagal menyalin key'));
+                });
             }
         };
         
-        // Kirim WA via WHAPI
-        async function sendViaWhapi(phone, key, invoice, amount, name) {
+        // Kirim WA (TANPA NAMA)
+        async function sendViaWhapi(phone, key, invoice, amount) {
             const statusDiv = document.getElementById('waStatus');
             statusDiv.style.display = 'block';
-            statusDiv.className = 'status-message';
             statusDiv.innerHTML = '📤 Mengirim key via WhatsApp...';
             
-            // Validasi nomor sebelum kirim
             if (!phone || phone.length < 10) {
                 statusDiv.className = 'status-message status-error';
-                statusDiv.innerHTML = '❌ Nomor WhatsApp tidak valid. Tapi key sudah tampil di atas!';
+                statusDiv.innerHTML = '❌ Nomor WA tidak valid. Tapi key bisa dipakai!';
                 return false;
             }
             
             try {
                 const formattedPhone = formatPhoneApi(phone);
-                const currentTime = getCurrentTime();
-                const expireDate = getExpireDate();
                 const formattedAmount = formatRupiah(amount);
                 
                 const response = await fetch('https://gate.whapi.cloud/messages/text', {
@@ -509,38 +491,26 @@
                     },
                     body: JSON.stringify({
                         to: formattedPhone,
-                        body: `🎉 *Halo, ${name}!* 🎉
+                        body: `🎉 *PEMBAYARAN BERHASIL!*
 
-Terima kasih telah melakukan pembayaran. Key premium Anda sudah siap digunakan.
-
-📋 *DETAIL TRANSAKSI*
-Invoice   : ${invoice}
-Tanggal   : ${currentTime}
-Total     : ${formattedAmount}
+Terima kasih telah melakukan pembayaran.
 
 🔑 *KEY PREMIUM ANDA*
 \`${key}\`
 
-📱 *CARA AKTIVASI*
-1. Buka aplikasi
-2. Masukkan key di atas
-3. Klik tombol *LOGIN*
-4. Selesai! Nikmati fitur premium
+📋 *DETAIL TRANSAKSI*
+Invoice : ${invoice}
+Total   : ${formattedAmount}
+Waktu   : ${getCurrentTime()}
 
-⏰ *MASA BERLAKU*
-Key ini berlaku hingga: *${expireDate}*
+⏰ Key berlaku 30 hari
 
-📞 *BUTUH BANTUAN?*
-Hubungi admin kami jika ada kendala:
-085849299253 (WhatsApp)
+📞 Butuh bantuan? Hubungi:
+085849299253 (Admin)
 
-Salam hangat,
-*Tim PlutoXTeam* 🚀`
+*PlutoXTeam* 🚀`
                     })
                 });
-                
-                const result = await response.json();
-                console.log('WHAPI Response:', result);
                 
                 if (response.ok) {
                     statusDiv.className = 'status-message status-success';
@@ -549,35 +519,33 @@ Salam hangat,
                     document.getElementById('waLink').href = `https://wa.me/${formattedPhone}`;
                     return true;
                 } else {
-                    throw new Error(result.message || 'Gagal kirim WA');
+                    throw new Error('Gagal kirim');
                 }
                 
             } catch (error) {
-                console.error('WHAPI Error:', error);
+                console.error('WA Error:', error);
                 statusDiv.className = 'status-message status-error';
-                statusDiv.innerHTML = `❌ Gagal kirim WA: ${error.message}. Tapi key sudah tampil di atas!`;
+                statusDiv.innerHTML = '❌ Gagal kirim WA, tapi key di atas bisa dipakai.';
                 return false;
             }
         }
         
         // Simpan key ke Firebase
-        async function saveKeyToFirebase(key, invoice, phone, name) {
+        async function saveKeyToFirebase(key, invoice, phone) {
             try {
                 await firebase.database().ref('Keys/' + key).set({
                     Type: 'Duration',
                     Value: '30d',
                     MaxDevices: 1,
                     ActivatedAt: Date.now(),
-                    Devices: null,
                     invoice: invoice,
                     phone: phone,
-                    customerName: name,
                     source: 'doku_payment'
                 });
-                console.log('✅ Key tersimpan di Firebase');
+                console.log('✅ Key tersimpan');
                 return true;
             } catch (error) {
-                console.error('❌ Gagal simpan ke Firebase:', error);
+                console.error('❌ Gagal simpan:', error);
                 return false;
             }
         }
@@ -587,46 +555,40 @@ Salam hangat,
             window.location.href = `https://wa.me/${ADMIN_PHONE}?text=Halo%20admin%20PlutoXTeam%2C%20saya%20butuh%20bantuan%20terkait%20key%20premium%20saya`;
         };
         
-        // Handle logo error
-        window.handleLogoError = function() {
-            document.getElementById('mainLogo').style.display = 'none';
-            document.getElementById('logoFallback').style.display = 'block';
-        };
-        
-        // INISIASI UTAMA
+        // MAIN FUNCTION
         window.onload = async function() {
-            // 1. Ambil data dari URL
-            const data = getUrlParams();
+            // Ambil data (prioritas Firebase, fallback URL)
+            const data = await getTransactionData();
             
-            // 2. Validasi nomor WA
-            const hasValidPhone = isValidPhone(data.phone);
+            if (!data) {
+                alert('Invoice tidak ditemukan');
+                return;
+            }
             
-            // 3. Format nomor untuk tampilan
-            const localPhone = formatPhoneLocal(data.phone);
-            
-            // 4. Update tampilan
+            // Update tampilan
             document.getElementById('invoice').textContent = data.invoice;
             document.getElementById('amount').textContent = formatRupiah(data.amount);
             document.getElementById('time').textContent = getCurrentTime();
+            
+            const localPhone = formatPhoneLocal(data.phone);
             document.getElementById('phoneDisplay').textContent = localPhone;
             document.getElementById('phoneLink').textContent = localPhone;
-            document.getElementById('customerName').textContent = data.name;
             
-            // 5. Generate key
+            // Generate key
             const licenseKey = generateKey();
             document.getElementById('keyDisplay').textContent = licenseKey;
             
-            // 6. Simpan ke Firebase
-            await saveKeyToFirebase(licenseKey, data.invoice, data.phone, data.name);
+            // Simpan ke Firebase
+            await saveKeyToFirebase(licenseKey, data.invoice, data.phone);
             
-            // 7. Kirim WA (hanya jika nomor valid)
-            if (hasValidPhone) {
-                await sendViaWhapi(data.phone, licenseKey, data.invoice, data.amount, data.name);
+            // Kirim WA (hanya jika nomor valid)
+            if (data.phone && data.phone.length >= 10) {
+                await sendViaWhapi(data.phone, licenseKey, data.invoice, data.amount);
             } else {
                 const statusDiv = document.getElementById('waStatus');
                 statusDiv.style.display = 'block';
                 statusDiv.className = 'status-message status-error';
-                statusDiv.innerHTML = '❌ Nomor WhatsApp tidak tersedia atau tidak valid. Silakan hubungi admin untuk mendapatkan key.';
+                statusDiv.innerHTML = '❌ Nomor WA tidak valid. Silakan hubungi admin.';
             }
         };
     </script>
