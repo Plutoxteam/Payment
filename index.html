@@ -177,6 +177,16 @@
             background: #128C7E;
         }
         
+        .btn-copy {
+            background: #6c757d;
+            color: white;
+            margin-top: 5px;
+        }
+        
+        .btn-copy:hover {
+            background: #5a6268;
+        }
+        
         .error-box {
             background: #f8d7da;
             border: 1px solid #f5c6cb;
@@ -218,6 +228,7 @@
             font-weight: bold;
             letter-spacing: 2px;
             margin: 15px 0;
+            word-break: break-all;
         }
         
         .footer {
@@ -247,12 +258,33 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        .copy-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        
+        .copy-notification.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
     <div class="container" id="mainContainer">
         <!-- Konten akan diisi oleh JavaScript -->
     </div>
+    
+    <div class="copy-notification" id="copyNotification">✅ Key berhasil disalin</div>
     
     <script>
         // ============================================
@@ -272,6 +304,40 @@
         // ============================================
         const urlParams = new URLSearchParams(window.location.search);
         const deviceId = urlParams.get('device_id');
+        
+        // ============================================
+        // FUNGSI FORMAT NOMOR WA (otomatis)
+        // ============================================
+        function formatPhoneNumber(phone) {
+            // Hapus semua karakter non-digit
+            let cleaned = phone.replace(/\D/g, '');
+            
+            // Jika diawali 0, ganti 62
+            if (cleaned.startsWith('0')) {
+                cleaned = '62' + cleaned.substring(1);
+            }
+            // Jika tidak diawali 62, tambahkan 62
+            else if (!cleaned.startsWith('62')) {
+                cleaned = '62' + cleaned;
+            }
+            
+            return cleaned;
+        }
+        
+        // ============================================
+        // FUNGSI COPY KE CLIPBOARD
+        // ============================================
+        window.copyKey = function(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const notification = document.getElementById('copyNotification');
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 2000);
+            }).catch(err => {
+                alert('Gagal menyalin key. Silakan copy manual.');
+            });
+        };
         
         // ============================================
         // FUNGSI KEMBALI KE HALAMAN UTAMA
@@ -442,8 +508,8 @@
                         
                         <div style="margin-bottom: 15px;">
                             <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 500;">Nomor WhatsApp</label>
-                            <input type="tel" id="trialPhone" placeholder="Contoh: 6281234567890" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
-                            <div style="font-size: 12px; color: #666; margin-top: 5px;">Gunakan kode negara 62, tanpa + atau 0</div>
+                            <input type="tel" id="trialPhone" placeholder="Contoh: 081234567890 atau 6281234567890" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                            <div style="font-size: 12px; color: #666; margin-top: 5px;">Bisa pakai 0 atau 62, nanti otomatis diformat</div>
                         </div>
                         
                         <button onclick="generateTrialKey('${deviceId}')" style="background: #28a745; color: white; border: none; padding: 14px; border-radius: 30px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer;">
@@ -469,17 +535,15 @@
         // ============================================
         window.generateTrialKey = async function(deviceId) {
             const name = document.getElementById('trialName').value.trim();
-            const phone = document.getElementById('trialPhone').value.trim();
+            let phone = document.getElementById('trialPhone').value.trim();
             
             if (!name || !phone) {
                 alert('Nama dan nomor WhatsApp harus diisi!');
                 return;
             }
             
-            if (!phone.startsWith('62')) {
-                alert('Nomor harus diawali 62 (contoh: 6281234567890)');
-                return;
-            }
+            // Format nomor (otomatis)
+            const formattedPhone = formatPhoneNumber(phone);
             
             // Disable tombol
             const btn = event.target;
@@ -500,12 +564,12 @@
             });
             
             try {
-                // Simpan ke Firebase
+                // Simpan ke Firebase (nomor sudah diformat)
                 await firebase.database().ref('trial_history/' + deviceId).set({
                     key: key,
                     lastTrialAt: Date.now(),
                     name: name,
-                    phone: phone
+                    phone: formattedPhone
                 });
                 
                 // Simpan key di Keys
@@ -517,7 +581,7 @@
                     Devices: null
                 });
                 
-                // Kirim via WHAPI
+                // Kirim via WHAPI (nomor sudah diformat)
                 try {
                     await fetch('https://gate.whapi.cloud/messages/text', {
                         method: 'POST',
@@ -526,7 +590,7 @@
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            to: phone,
+                            to: formattedPhone,
                             body: `🎁 *KEY TRIAL PLUTOXTEAM 3 HARI* 🎁\n\nHalo ${name}, selamat mencoba!\n\n*Key Trial Anda:* \`${key}\`\n*Berlaku hingga:* ${expireStr}\n\nGunakan key ini untuk aktivasi trial selama 3 hari.\n\nSetelah habis, Anda bisa membeli key premium untuk akses penuh.\n\nSalam,\nPlutoXTeam`
                         })
                     });
@@ -542,15 +606,19 @@
                         <h3>✅ Key Trial Berhasil!</h3>
                         <div style="background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; text-align: left;">
                             <div style="font-size: 14px; color: #666;">Nama: ${name}</div>
-                            <div style="font-size: 14px; color: #666;">WA: ${phone}</div>
+                            <div style="font-size: 14px; color: #666;">WA: ${formattedPhone}</div>
                             <div style="font-size: 14px; color: #666;">Berlaku hingga: ${expireStr}</div>
                         </div>
                         
-                        <div class="key-display">
+                        <div class="key-display" id="keyToCopy">
                             ${key}
                         </div>
                         
-                        <p style="color: #155724; margin-bottom: 15px;">Key telah dikirim ke WhatsApp Anda.</p>
+                        <button onclick="copyKey('${key}')" class="btn btn-copy">
+                            📋 Copy Key
+                        </button>
+                        
+                        <p style="color: #155724; margin: 15px 0;">Key telah dikirim ke WhatsApp Anda.</p>
                         
                         <!-- TOMBOL BELI PREMIUM TETAP ADA -->
                         <a href="${DOKU_LINK}" class="btn btn-buy" target="_blank" style="margin-bottom: 10px;">
