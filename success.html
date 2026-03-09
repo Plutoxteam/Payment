@@ -231,6 +231,11 @@
             transform: translateY(-2px);
         }
         
+        .btn-home {
+            background: #667eea;
+            margin-top: 15px;
+        }
+        
         .footer {
             margin-top: 24px;
             color: #999;
@@ -321,8 +326,9 @@
             </a>
         </div>
         
-        <a href="#" onclick="openApp()" class="btn" id="backToApp">
-            🔙 Kembali ke Aplikasi
+        <!-- TOMBOL KEMBALI KE MENU UTAMA (BUKAN KE APLIKASI) -->
+        <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" id="backToHome">
+            🏠 Kembali ke Menu Utama
         </a>
         
         <a href="#" onclick="contactAdmin()" class="btn btn-wa" style="margin-top: 10px;">
@@ -345,7 +351,6 @@
         
         const ADMIN_PHONE = '6285849299253';
         const WHAPI_TOKEN = 'dUtoaA65nf39YiR4oJweRlGP5fCPZXek';
-        const APP_PACKAGE_NAME = 'com.sidianbarut2027';
         
         // Ambil data dari URL
         function getUrlParams() {
@@ -381,15 +386,12 @@
             
             let cleaned = phone.replace(/\D/g, '');
             
-            // Jika diawali 62, ganti jadi 0
             if (cleaned.startsWith('62')) {
                 return '0' + cleaned.substring(2);
             }
-            // Jika sudah 0, biarkan
             if (cleaned.startsWith('0')) {
                 return cleaned;
             }
-            // Jika tidak diawali 0 atau 62, tambahkan 0
             return '0' + cleaned;
         }
         
@@ -404,16 +406,14 @@
             return cleaned;
         }
         
-        // Generate key (PREMIUM - sementara generate otomatis)
+        // Generate key (lebih pendek)
         function generateKey() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let key = 'PLTX-';
-            for (let i = 0; i < 4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
-            key += '-';
-            for (let i = 0; i < 4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
-            key += '-';
-            for (let i = 0; i < 4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
-            return key;
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // tanpa O,0,1,I
+            let key = '';
+            for (let i = 0; i < 8; i++) {
+                key += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return 'PLTX-' + key;
         }
         
         // Copy key
@@ -502,18 +502,6 @@ PlutoXTeam`
             }
         }
         
-        // Buka aplikasi (kembali ke app, bukan playstore)
-        window.openApp = function() {
-            // Coba buka aplikasi via deep link
-            window.location.href = `intent://#Intent;scheme=package:${APP_PACKAGE_NAME};package=${APP_PACKAGE_NAME};end`;
-            
-            // Fallback: kalau aplikasi gak terinstall, kasih tahu user
-            setTimeout(function() {
-                alert('Aplikasi tidak ditemukan. Pastikan aplikasi sudah terinstall.');
-                window.location.href = 'https://plutoxteam.github.io/Payment/';
-            }, 500);
-        };
-        
         // Hubungi admin
         window.contactAdmin = function() {
             window.location.href = `https://wa.me/${ADMIN_PHONE}?text=Halo%20admin%20PlutoXTeam%2C%20saya%20butuh%20bantuan`;
@@ -539,7 +527,7 @@ PlutoXTeam`
             document.getElementById('phoneDisplay').textContent = localPhone;
             document.getElementById('phoneLink').textContent = localPhone;
             
-            // Generate key (PREMIUM - sementara generate otomatis)
+            // Generate key (lebih pendek)
             const licenseKey = generateKey();
             document.getElementById('keyDisplay').textContent = licenseKey;
             
