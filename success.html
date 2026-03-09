@@ -296,6 +296,10 @@
                 <span class="info-label">Nomor WA</span>
                 <span class="info-value" id="phoneDisplay"></span>
             </div>
+            <div class="info-row">
+                <span class="info-label">Nama</span>
+                <span class="info-value" id="customerName"></span>
+            </div>
         </div>
         
         <div class="key-card">
@@ -326,7 +330,7 @@
             </a>
         </div>
         
-        <!-- TOMBOL KEMBALI KE MENU UTAMA (BUKAN KE APLIKASI) -->
+        <!-- TOMBOL KEMBALI KE MENU UTAMA -->
         <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" id="backToHome">
             🏠 Kembali ke Menu Utama
         </a>
@@ -380,6 +384,17 @@
             }).replace('pukul', 'pukul');
         }
         
+        // Format tanggal expire (30 hari dari sekarang)
+        function getExpireDate() {
+            const date = new Date();
+            date.setDate(date.getDate() + 30);
+            return date.toLocaleDateString('id-ID', { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            });
+        }
+        
         // Fungsi untuk mengubah 62xxx ke 08xxx
         function formatPhoneLocal(phone) {
             if (!phone) return 'Nomor tidak tersedia';
@@ -429,7 +444,7 @@
         };
         
         // Kirim WA via WHAPI
-        async function sendViaWhapi(phone, key, invoice) {
+        async function sendViaWhapi(phone, key, invoice, amount, name) {
             const statusDiv = document.getElementById('waStatus');
             statusDiv.style.display = 'block';
             statusDiv.className = 'status-message';
@@ -437,6 +452,9 @@
             
             try {
                 const formattedPhone = formatPhoneApi(phone);
+                const currentTime = getCurrentTime();
+                const expireDate = getExpireDate();
+                const formattedAmount = formatRupiah(amount);
                 
                 const response = await fetch('https://gate.whapi.cloud/messages/text', {
                     method: 'POST',
@@ -446,17 +464,43 @@
                     },
                     body: JSON.stringify({
                         to: formattedPhone,
-                        body: `🔑 *KEY PREMIUM PLUTOXTEAM* 🔑
+                        body: `🎉 *Halo, ${name}!* 🎉
 
-Halo! Terima kasih telah melakukan pembayaran.
+Terima kasih telah melakukan pembayaran. Key premium Anda sudah siap digunakan.
 
-*Invoice:* ${invoice}
-*Key:* \`${key}\`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 *DETAIL TRANSAKSI*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Invoice   : ${invoice}
+Tanggal   : ${currentTime}
+Total     : ${formattedAmount}
 
-Simpan key ini baik-baik untuk aktivasi.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔑 *KEY PREMIUM ANDA*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\`${key}\`
 
-Salam,
-PlutoXTeam`
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📱 *CARA AKTIVASI*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Buka aplikasi
+2. Masukkan key di atas
+3. Klik tombol *LOGIN*
+4. Selesai! Nikmati fitur premium
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⏰ *MASA BERLAKU*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Key ini berlaku hingga: *${expireDate}*
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📞 *BUTUH BANTUAN?*
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Hubungi admin kami jika ada kendala:
+📱 085849299253 (WhatsApp)
+
+Salam hangat,
+*Tim PlutoXTeam* 🚀`
                     })
                 });
                 
@@ -482,7 +526,7 @@ PlutoXTeam`
         }
         
         // Simpan key ke Firebase
-        async function saveKeyToFirebase(key, invoice, phone) {
+        async function saveKeyToFirebase(key, invoice, phone, name) {
             try {
                 await firebase.database().ref('Keys/' + key).set({
                     Type: 'Duration',
@@ -492,6 +536,7 @@ PlutoXTeam`
                     Devices: null,
                     invoice: invoice,
                     phone: phone,
+                    customerName: name,
                     source: 'doku_payment'
                 });
                 console.log('✅ Key tersimpan di Firebase');
@@ -504,7 +549,7 @@ PlutoXTeam`
         
         // Hubungi admin
         window.contactAdmin = function() {
-            window.location.href = `https://wa.me/${ADMIN_PHONE}?text=Halo%20admin%20PlutoXTeam%2C%20saya%20butuh%20bantuan`;
+            window.location.href = `https://wa.me/${ADMIN_PHONE}?text=Halo%20admin%20PlutoXTeam%2C%20saya%20butuh%20bantuan%20terkait%20key%20premium%20saya`;
         };
         
         // Handle logo error
@@ -526,16 +571,17 @@ PlutoXTeam`
             document.getElementById('time').textContent = getCurrentTime();
             document.getElementById('phoneDisplay').textContent = localPhone;
             document.getElementById('phoneLink').textContent = localPhone;
+            document.getElementById('customerName').textContent = data.name;
             
             // Generate key (lebih pendek)
             const licenseKey = generateKey();
             document.getElementById('keyDisplay').textContent = licenseKey;
             
             // Simpan key ke Firebase
-            await saveKeyToFirebase(licenseKey, data.invoice, data.phone);
+            await saveKeyToFirebase(licenseKey, data.invoice, data.phone, data.name);
             
             // Kirim WA
-            await sendViaWhapi(data.phone, licenseKey, data.invoice);
+            await sendViaWhapi(data.phone, licenseKey, data.invoice, data.amount, data.name);
         };
     </script>
 </body>
