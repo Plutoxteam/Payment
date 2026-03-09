@@ -304,27 +304,6 @@
         // ============================================
         const urlParams = new URLSearchParams(window.location.search);
         const deviceId = urlParams.get('device_id');
-
-        // PROTEKSI: HARUS ADA DEVICE ID (kecuali halaman utama tanpa parameter)
-        if (!deviceId && window.location.pathname !== '/Payment/') {
-            // Tampilkan pesan error
-            document.body.innerHTML = `
-                <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px;">
-                    <div style="background: white; border-radius: 24px; padding: 32px 24px; max-width: 400px; text-align: center;">
-                        <h2 style="color: #dc3545; margin-bottom: 20px;">❌ Akses Ditolak</h2>
-                        <p style="color: #333; margin-bottom: 20px; line-height: 1.6;">
-                            Halaman ini hanya bisa diakses dari aplikasi.<br><br>
-                            <strong>Generate Trial harus klik tombol di Aplikasi dulu.</strong>
-                        </p>
-                        <a href="https://plutoxteam.github.io/Payment/" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 30px; font-weight: 600;">
-                            Kembali ke Halaman Utama
-                        </a>
-                    </div>
-                </div>
-            `;
-            // Hentikan eksekusi script
-            throw new Error('No device ID');
-        }
         
         // ============================================
         // FUNGSI FORMAT NOMOR WA
@@ -358,7 +337,18 @@
         };
         
         // ============================================
-        // RENDER HALAMAN UTAMA (TANPA DEVICE ID)
+        // FUNGSI CEK SEBELUM TRIAL
+        // ============================================
+        window.checkTrialAccess = function() {
+            if (!deviceId) {
+                alert('❌ Untuk mendapatkan key trial, Anda harus membukanya dari aplikasi dengan klik tombol "Buy Key".');
+                return false;
+            }
+            return true;
+        };
+        
+        // ============================================
+        // RENDER HALAMAN UTAMA
         // ============================================
         function renderHomePage() {
             return `
@@ -398,6 +388,11 @@
                 
                 <a href="${DOKU_LINK}" class="btn btn-buy" target="_blank">
                     💳 Beli Key Premium (Rp 50.000)
+                </a>
+                
+                <!-- TOMBOL TRIAL DENGAN PENGECEKAN -->
+                <a href="#" id="trialBtn" class="btn btn-trial" onclick="event.preventDefault(); if(deviceId) { window.location.href='?device_id=' + deviceId; } else { alert('❌ Untuk mendapatkan key trial, Anda harus membukanya dari aplikasi dengan klik tombol \\'Buy Key\\'.'); }">
+                    🎁 Coba Gratis 3 Hari
                 </a>
                 
                 <a href="https://wa.me/${ADMIN_PHONE}?text=Halo%20admin%20PlutoXTeam%2C%20saya%20ingin%20bertanya" class="btn btn-admin" target="_blank">
@@ -564,7 +559,7 @@
             });
             
             try {
-                // Simpan key di Keys (TANPA trial_history)
+                // Simpan key di Keys
                 await firebase.database().ref('Keys/' + key).set({
                     Type: 'Duration',
                     Value: '3d',
@@ -646,7 +641,7 @@
             container.innerHTML = renderTrialPage();
             
             try {
-                // Cek trial_history (untuk informasi saja)
+                // Cek trial_history
                 const snapshot = await firebase.database().ref('trial_history/' + deviceId).once('value');
                 
                 if (snapshot.exists()) {
