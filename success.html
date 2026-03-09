@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
+        /* Styles Anda tetap sama persis */
         * {
             margin: 0;
             padding: 0;
@@ -356,18 +357,54 @@
         const ADMIN_PHONE = '6285849299253';
         const WHAPI_TOKEN = 'dUtoaA65nf39YiR4oJweRlGP5fCPZXek';
         
-        // Ambil data dari URL
-        // Ambil data dari URL (untuk Custom Field DOKU)
-function getUrlParams() {
-    const params = new URLSearchParams(window.location.search);
-    return {
-        invoice: params.get('invoice') || params.get('order_id') || 'INV-' + Date.now(),
-        amount: params.get('amount') || params.get('gross_amount') || '50000',
-        // Ambil dari Custom Field yang sudah dibuat
-        phone: params.get('Nomor WA') || params.get('phone') || params.get('customer_phone') || '',
-        name: params.get('Nama') || params.get('name') || params.get('customer_name') || 'Pelanggan'
-    };
-}
+        // ================== FUNGSI-FUNGSI BARU ==================
+        
+        /**
+         * Membersihkan nomor telepon dari karakter non-digit
+         */
+        function cleanPhoneNumber(rawPhone) {
+            if (!rawPhone) return '';
+            // Hapus semua karakter kecuali angka
+            return rawPhone.replace(/\D/g, '');
+        }
+
+        /**
+         * Validasi nomor telepon (minimal 10 digit, tidak kosong)
+         */
+        function isValidPhone(phone) {
+            return phone && phone.length >= 10;
+        }
+
+        /**
+         * Mendapatkan data dari URL dengan prioritas yang benar
+         */
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            
+            // Urutan prioritas untuk nomor WA: 'Nomor WA' (dari DOKU) -> 'phone' -> 'customer_phone'
+            const rawPhone = params.get('Nomor WA') || params.get('phone') || params.get('customer_phone') || '';
+            
+            // Urutan prioritas untuk nama: 'Nama' (dari DOKU) -> 'name' -> 'customer_name'
+            const name = params.get('Nama') || params.get('name') || params.get('customer_name') || 'Pelanggan';
+            
+            // Bersihkan nomor WA
+            const cleanPhone = cleanPhoneNumber(rawPhone);
+            
+            console.log('📦 Data dari URL:', {
+                invoice: params.get('invoice') || params.get('order_id'),
+                amount: params.get('amount') || params.get('gross_amount'),
+                rawPhone: rawPhone,
+                cleanPhone: cleanPhone,
+                name: name
+            });
+
+            return {
+                invoice: params.get('invoice') || params.get('order_id') || 'INV-' + Date.now(),
+                amount: params.get('amount') || params.get('gross_amount') || '50000',
+                phone: cleanPhone, // Langsung simpan yang sudah bersih
+                name: name
+            };
+        }
         
         // Format Rupiah
         function formatRupiah(amount) {
@@ -383,7 +420,7 @@ function getUrlParams() {
                 year: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'
-            }).replace('pukul', 'pukul');
+            });
         }
         
         // Format tanggal expire (30 hari dari sekarang)
@@ -445,12 +482,19 @@ function getUrlParams() {
             }
         };
         
-        // Kirim WA via WHAPI
+        // Kirim WA via WHAPI (TIDAK DIUBAH, SUDAH BAIK)
         async function sendViaWhapi(phone, key, invoice, amount, name) {
             const statusDiv = document.getElementById('waStatus');
             statusDiv.style.display = 'block';
             statusDiv.className = 'status-message';
             statusDiv.innerHTML = '📤 Mengirim key via WhatsApp...';
+            
+            // Validasi nomor sebelum kirim
+            if (!phone || phone.length < 10) {
+                statusDiv.className = 'status-message status-error';
+                statusDiv.innerHTML = '❌ Nomor WhatsApp tidak valid. Tapi key sudah tampil di atas!';
+                return false;
+            }
             
             try {
                 const formattedPhone = formatPhoneApi(phone);
@@ -464,7 +508,9 @@ function getUrlParams() {
                         'Authorization': `Bearer ${WHAPI_TOKEN}`,
                         'Content-Type': 'application/json'
                     },
-                    body: `🎉 *Halo, ${name}!* 🎉
+                    body: JSON.stringify({
+                        to: formattedPhone,
+                        body: `🎉 *Halo, ${name}!* 🎉
 
 Terima kasih telah melakukan pembayaran. Key premium Anda sudah siap digunakan.
 
@@ -491,9 +537,10 @@ Hubungi admin kami jika ada kendala:
 
 Salam hangat,
 *Tim PlutoXTeam* 🚀`
-});
-
-const result = await response.json();
+                    })
+                });
+                
+                const result = await response.json();
                 console.log('WHAPI Response:', result);
                 
                 if (response.ok) {
@@ -524,7 +571,7 @@ const result = await response.json();
                     ActivatedAt: Date.now(),
                     Devices: null,
                     invoice: invoice,
-                    phone: phone,
+                    phone: phone, // Nomor sudah bersih
                     customerName: name,
                     source: 'doku_payment'
                 });
@@ -547,14 +594,18 @@ const result = await response.json();
             document.getElementById('logoFallback').style.display = 'block';
         };
         
-        // Inisiasi
+        // ================== INISIASI UTAMA ==================
         window.onload = async function() {
+            // 1. Ambil data dari URL (termasuk Custom Field DOKU)
             const data = getUrlParams();
             
-            // Format nomor untuk tampilan lokal (08xxx)
+            // 2. Validasi awal: Cek apakah nomor WA ada
+            const hasValidPhone = isValidPhone(data.phone);
+            
+            // 3. Format nomor untuk tampilan
             const localPhone = formatPhoneLocal(data.phone);
             
-            // Update tampilan
+            // 4. Update tampilan HTML
             document.getElementById('invoice').textContent = data.invoice;
             document.getElementById('amount').textContent = formatRupiah(data.amount);
             document.getElementById('time').textContent = getCurrentTime();
@@ -562,15 +613,24 @@ const result = await response.json();
             document.getElementById('phoneLink').textContent = localPhone;
             document.getElementById('customerName').textContent = data.name;
             
-            // Generate key (lebih pendek)
+            // 5. Generate key
             const licenseKey = generateKey();
             document.getElementById('keyDisplay').textContent = licenseKey;
             
-            // Simpan key ke Firebase
+            // 6. Simpan key ke Firebase (dengan nomor yang sudah dibersihkan)
             await saveKeyToFirebase(licenseKey, data.invoice, data.phone, data.name);
             
-            // Kirim WA
-            await sendViaWhapi(data.phone, licenseKey, data.invoice, data.amount, data.name);
+            // 7. Kirim WA hanya jika nomor valid
+            if (hasValidPhone) {
+                await sendViaWhapi(data.phone, licenseKey, data.invoice, data.amount, data.name);
+            } else {
+                // Tampilkan pesan error jika nomor tidak valid
+                const statusDiv = document.getElementById('waStatus');
+                statusDiv.style.display = 'block';
+                statusDiv.className = 'status-message status-error';
+                statusDiv.innerHTML = '❌ Nomor WhatsApp tidak tersedia atau tidak valid. Silakan hubungi admin untuk mendapatkan key.';
+                console.warn('⚠️ WA tidak dikirim: nomor tidak valid', data.phone);
+            }
         };
     </script>
 </body>
