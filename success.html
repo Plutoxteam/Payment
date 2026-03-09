@@ -178,12 +178,6 @@
             margin: 10px 0;
         }
         
-        .phone-display-small {
-            font-size: 14px;
-            color: #666;
-            margin-top: 5px;
-        }
-        
         .status-message {
             padding: 10px;
             border-radius: 8px;
@@ -295,9 +289,8 @@
             </div>
             <div class="info-row">
                 <span class="info-label">Nomor WA</span>
-                <span class="info-value" id="phoneDisplay">62xxxxxxxxxx</span>
+                <span class="info-value" id="phoneDisplay"></span>
             </div>
-            <div class="phone-display-small" id="phoneDisplayLocal"></div>
         </div>
         
         <div class="key-card">
@@ -321,7 +314,7 @@
                 Key aktivasi akan dikirim ke nomor WhatsApp Anda. 
             </div>
             
-            <div class="phone-display" id="phoneLink">62xxxxxxxxxx</div>
+            <div class="phone-display" id="phoneLink"></div>
             
             <a href="#" id="waLink" class="btn btn-wa" target="_blank">
                 📱 Buka WhatsApp
@@ -352,7 +345,7 @@
         
         const ADMIN_PHONE = '6285849299253';
         const WHAPI_TOKEN = 'dUtoaA65nf39YiR4oJweRlGP5fCPZXek';
-        const APP_PACKAGE_NAME = 'com.sidian2027';
+        const APP_PACKAGE_NAME = 'com.sidianbarut2027';
         
         // Ambil data dari URL
         function getUrlParams() {
@@ -360,7 +353,7 @@
             return {
                 invoice: params.get('invoice') || params.get('order_id') || 'INV-' + Date.now(),
                 amount: params.get('amount') || params.get('gross_amount') || '50000',
-                phone: params.get('phone') || params.get('customer_phone') || '62xxxxxxxxxx',
+                phone: params.get('phone') || params.get('customer_phone') || '',
                 name: params.get('name') || params.get('customer_name') || 'Pelanggan'
             };
         }
@@ -382,12 +375,22 @@
             }).replace('pukul', 'pukul');
         }
         
-        // Format nomor WA (62 ke 0)
+        // Fungsi untuk mengubah 62xxx ke 08xxx
         function formatPhoneLocal(phone) {
-            if (phone.startsWith('62')) {
-                return '0' + phone.substring(2);
+            if (!phone) return 'Nomor tidak tersedia';
+            
+            let cleaned = phone.replace(/\D/g, '');
+            
+            // Jika diawali 62, ganti jadi 0
+            if (cleaned.startsWith('62')) {
+                return '0' + cleaned.substring(2);
             }
-            return phone;
+            // Jika sudah 0, biarkan
+            if (cleaned.startsWith('0')) {
+                return cleaned;
+            }
+            // Jika tidak diawali 0 atau 62, tambahkan 0
+            return '0' + cleaned;
         }
         
         // Format nomor WA untuk API (08 ke 62)
@@ -504,10 +507,11 @@ PlutoXTeam`
             // Coba buka aplikasi via deep link
             window.location.href = `intent://#Intent;scheme=package:${APP_PACKAGE_NAME};package=${APP_PACKAGE_NAME};end`;
             
-            // Fallback: kalau aplikasi gak terinstall, balik ke halaman utama
+            // Fallback: kalau aplikasi gak terinstall, kasih tahu user
             setTimeout(function() {
+                alert('Aplikasi tidak ditemukan. Pastikan aplikasi sudah terinstall.');
                 window.location.href = 'https://plutoxteam.github.io/Payment/';
-            }, 1000);
+            }, 500);
         };
         
         // Hubungi admin
@@ -532,9 +536,8 @@ PlutoXTeam`
             document.getElementById('invoice').textContent = data.invoice;
             document.getElementById('amount').textContent = formatRupiah(data.amount);
             document.getElementById('time').textContent = getCurrentTime();
-            document.getElementById('phoneDisplay').textContent = data.phone;
-            document.getElementById('phoneDisplayLocal').textContent = '📱 ' + localPhone;
-            document.getElementById('phoneLink').textContent = data.phone;
+            document.getElementById('phoneDisplay').textContent = localPhone;
+            document.getElementById('phoneLink').textContent = localPhone;
             
             // Generate key (PREMIUM - sementara generate otomatis)
             const licenseKey = generateKey();
