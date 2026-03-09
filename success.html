@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Pembayaran Berhasil - PlutoXTeam</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 16px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 24px;
+            padding: 32px 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            animation: slideUp 0.5s ease;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .logo-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .logo {
+            max-width: 120px;
+            max-height: 80px;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+        
+        .logo-fallback {
+            font-size: 24px;
+            font-weight: 800;
+            color: #667eea;
+            letter-spacing: 1px;
+            display: none;
+        }
+        
+        .logo-fallback span {
+            color: #764ba2;
+        }
+        
+        .success-icon {
+            width: 70px;
+            height: 70px;
+            background: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            animation: scaleIn 0.5s ease 0.2s both;
+        }
+        
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+        
+        .success-icon svg {
+            width: 35px;
+            height: 35px;
+            fill: white;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 26px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 15px;
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+        
+        .info-card {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            text-align: left;
+            border: 1px solid #eaeaea;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .info-label {
+            color: #888;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .key-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        
+        .key-title {
+            color: rgba(255,255,255,0.9);
+            font-size: 14px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .key-display {
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            font-family: monospace;
+            letter-spacing: 2px;
+            word-break: break-all;
+            border: 2px dashed rgba(255,255,255,0.5);
+        }
+        
+        .whatsapp-section {
+            background: #e8f5e9;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border-left: 4px solid #25D366;
+        }
+        
+        .whatsapp-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #075E54;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .whatsapp-title svg {
+            width: 20px;
+            height: 20px;
+            fill: #25D366;
+        }
+        
+        .whatsapp-text {
+            color: #2c3e50;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+        
+        .phone-display {
+            background: white;
+            border: 1px solid #25D366;
+            border-radius: 30px;
+            padding: 12px 16px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #075E54;
+            text-align: center;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        
+        .status-message {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 24px;
+            border-radius: 30px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 8px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-wa {
+            background: #25D366;
+            margin-top: 12px;
+        }
+        
+        .btn-wa:hover {
+            background: #128C7E;
+        }
+        
+        .footer {
+            margin-top: 24px;
+            color: #999;
+            font-size: 12px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        
+        .footer strong {
+            color: #667eea;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- LOGO -->
+        <div class="logo-container">
+            <img src="logo.png" alt="PlutoXTeam Logo" class="logo" id="mainLogo" onerror="handleLogoError()">
+            <div class="logo-fallback" id="logoFallback">
+                Pluto<span>XTeam</span>
+            </div>
+        </div>
+        
+        <div class="success-icon">
+            <svg viewBox="0 0 24 24">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+            </svg>
+        </div>
+        
+        <h1>Pembayaran Berhasil! ✅</h1>
+        <div class="subtitle" id="welcomeMessage">Terima kasih, pembayaran Anda telah kami terima</div>
+        
+        <!-- INFO TRANSAKSI -->
+        <div class="info-card">
+            <div class="info-row">
+                <span class="info-label">Invoice</span>
+                <span class="info-value" id="invoice">INV-xxxxxxxx</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Total</span>
+                <span class="info-value" id="amount">Rp xxx.xxx</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Waktu</span>
+                <span class="info-value" id="time">{{date}}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Nomor WA</span>
+                <span class="info-value" id="phoneDisplay">62xxxxxxxxxx</span>
+            </div>
+        </div>
+        
+        <!-- KEY CARD -->
+        <div class="key-card">
+            <div class="key-title">🔑 LICENSE KEY ANDA</div>
+            <div class="key-display" id="keyDisplay">Generating...</div>
+        </div>
+        
+        <!-- STATUS PENGIRIMAN WA -->
+        <div id="waStatus" class="status-message"></div>
+        
+        <!-- WHATSAPP SECTION -->
+        <div class="whatsapp-section">
+            <div class="whatsapp-title">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19.05 4.91A9.816 9.816 0 0 0 12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01zm-7.01 15.24c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.32a8.26 8.26 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.82 2.42a8.24 8.24 0 0 1 2.41 5.83c.01 4.54-3.69 8.23-8.22 8.23z"/>
+                </svg>
+                <span>Key juga dikirim via WhatsApp</span>
+            </div>
+            
+            <div class="whatsapp-text">
+                Key aktivasi telah dikirim ke nomor WhatsApp Anda. 
+                Cek sekarang!
+            </div>
+            
+            <a href="#" id="waLink" class="btn btn-wa" target="_blank">
+                📱 Buka WhatsApp
+            </a>
+        </div>
+        
+        <!-- TOMBOL KEMBALI KE APLIKASI -->
+        <a href="#" onclick="openApp()" class="btn" id="backToApp">
+            🔙 Kembali ke Aplikasi
+        </a>
+        
+        <!-- TOMBOL HUBUNGI ADMIN (NOMOR: 085849299253) -->
+        <a href="#" onclick="contactAdmin()" class="btn btn-wa" style="margin-top: 10px; background: #25D366;">
+            📞 Hubungi Admin (085849299253)
+        </a>
+        
+        <div class="footer">
+            <strong>PlutoXTeam</strong> • Key otomatis terkirim
+        </div>
+    </div>
+    
+    <script>
+        // ============================================
+        // KONFIGURASI FINAL - ANTI-BAN READY!
+        // ============================================
+        const WHAPI_TOKEN = 'dUtoaA65nf39YiR4oJweRlGP5fCPZXek';
+        const WA_DELAY = 3000; // 3 detik antar pesan (WAJIB!)
+        const APP_PACKAGE_NAME = 'com.sidian2027';
+        const ADMIN_PHONE = '6285849299253'; // NOMOR ADMIN UNTUK KONTAK
+        
+        // ============================================
+        // HANDLE LOGO ERROR
+        // ============================================
+        function handleLogoError() {
+            document.getElementById('mainLogo').style.display = 'none';
+            document.getElementById('logoFallback').style.display = 'block';
+        }
+        
+        // ============================================
+        // AMBIL DATA DARI URL
+        // ============================================
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                invoice: params.get('invoice') || params.get('order_id') || params.get('trx_id') || 'INV-' + Date.now(),
+                amount: params.get('amount') || params.get('gross_amount') || params.get('total') || '50000',
+                phone: params.get('phone') || params.get('customer_phone') || params.get('wa') || '62xxxxxxxxxx',
+                name: params.get('name') || params.get('customer_name') || 'Pelanggan'
+            };
+        }
+        
+        // ============================================
+        // FORMAT RUPIAH
+        // ============================================
+        function formatRupiah(amount) {
+            return 'Rp ' + parseInt(amount).toLocaleString('id-ID');
+        }
+        
+        // ============================================
+        // FORMAT TANGGAL
+        // ============================================
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleDateString('id-ID', { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).replace('pukul', 'pukul');
+        }
+        
+        // ============================================
+        // GENERATE KEY UNIK
+        // ============================================
+        function generateKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let key = 'PLTX-';
+            
+            for (let i = 0; i < 4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
+            key += '-';
+            for (let i = 0; i < 4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
+            key += '-';
+            for (let i = 0; i < 4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
+            
+            return key;
+        }
+        
+        // ============================================
+        // KIRIM VIA WHAPI (DENGAN DELAY)
+        // ============================================
+        async function sendViaWhapi(phone, key, invoice) {
+            const statusDiv = document.getElementById('waStatus');
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'status-message status-info';
+            statusDiv.innerHTML = '📤 Mengirim key via WhatsApp... <span class="loading"></span>';
+            
+            try {
+                let formattedPhone = phone.replace(/\D/g, '');
+                if (!formattedPhone.startsWith('62')) formattedPhone = '62' + formattedPhone;
+                
+                const response = await fetch('https://gate.whapi.cloud/messages/text', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${WHAPI_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        to: formattedPhone,
+                        body: `🔑 *KEY PREMIUM PLUTOXTEAM* 🔑
+
+Halo! Terima kasih telah melakukan pembayaran.
+
+*Invoice:* ${invoice}
+*Key:* \`${key}\`
+
+Simpan key ini baik-baik untuk aktivasi.
+
+Salam,
+PlutoXTeam`
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('WHAPI Response:', result);
+                
+                if (response.ok) {
+                    statusDiv.className = 'status-message status-success';
+                    statusDiv.innerHTML = '✅ Key berhasil dikirim ke WhatsApp!';
+                    
+                    document.getElementById('waLink').href = `https://wa.me/${formattedPhone}?text=Halo%20saya%20telah%20menerima%20key%20${key}`;
+                    
+                    // DELAY PENTING UNTUK ANTI-BAN!
+                    await new Promise(resolve => setTimeout(resolve, WA_DELAY));
+                    
+                    return true;
+                } else {
+                    throw new Error(result.message || 'Gagal kirim WA');
+                }
+                
+            } catch (error) {
+                console.error('WHAPI Error:', error);
+                statusDiv.className = 'status-message status-error';
+                statusDiv.innerHTML = `❌ Gagal kirim WA: ${error.message}. Tapi key sudah tampil di atas!`;
+                return false;
+            }
+        }
+        
+        // ============================================
+        // BUKA APLIKASI
+        // ============================================
+        function openApp() {
+            const intentUrl = `intent://#Intent;scheme=package:${APP_PACKAGE_NAME};package=${APP_PACKAGE_NAME};end`;
+            const playStoreUrl = `https://play.google.com/store/apps/details?id=${APP_PACKAGE_NAME}`;
+            
+            window.location.href = intentUrl;
+            setTimeout(() => window.location.href = playStoreUrl, 1000);
+        }
+        
+        // ============================================
+        // HUBUNGI ADMIN VIA WHATSAPP
+        // ============================================
+        function contactAdmin() {
+            window.location.href = `https://wa.me/${ADMIN_PHONE}?text=Halo%20admin%20PlutoXTeam%2C%20saya%20butuh%20bantuan%20terkait%20key%20saya.`;
+        }
+        
+        // ============================================
+        // INISIASI HALAMAN
+        // ============================================
+        window.onload = async function() {
+            const data = getUrlParams();
+            
+            document.getElementById('invoice').textContent = data.invoice;
+            document.getElementById('amount').textContent = formatRupiah(data.amount);
+            document.getElementById('time').textContent = getCurrentTime();
+            document.getElementById('phoneDisplay').textContent = data.phone;
+            document.getElementById('welcomeMessage').innerHTML = `Terima kasih ${data.name}, pembayaran Anda telah kami terima`;
+            
+            const licenseKey = generateKey();
+            document.getElementById('keyDisplay').textContent = licenseKey;
+            
+            // Kirim WA hanya jika token valid
+            if (WHAPI_TOKEN && WHAPI_TOKEN !== 'ISI_TOKEN_WHAPI_ANDA_DISINI') {
+                await sendViaWhapi(data.phone, licenseKey, data.invoice);
+            } else {
+                const statusDiv = document.getElementById('waStatus');
+                statusDiv.style.display = 'block';
+                statusDiv.className = 'status-message status-info';
+                statusDiv.innerHTML = '⚠️ Token WHAPI belum diisi. Key hanya tampil di halaman ini.';
+            }
+            
+            localStorage.setItem('lastKey', licenseKey);
+            localStorage.setItem('lastInvoice', data.invoice);
+        };
+    </script>
+</body>
+</html>
