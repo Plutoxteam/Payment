@@ -304,23 +304,38 @@
         // ============================================
         const urlParams = new URLSearchParams(window.location.search);
         const deviceId = urlParams.get('device_id');
+
+        // PROTEKSI: HARUS ADA DEVICE ID (kecuali halaman utama tanpa parameter)
+        if (!deviceId && window.location.pathname !== '/Payment/') {
+            // Tampilkan pesan error
+            document.body.innerHTML = `
+                <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 16px;">
+                    <div style="background: white; border-radius: 24px; padding: 32px 24px; max-width: 400px; text-align: center;">
+                        <h2 style="color: #dc3545; margin-bottom: 20px;">❌ Akses Ditolak</h2>
+                        <p style="color: #333; margin-bottom: 20px; line-height: 1.6;">
+                            Halaman ini hanya bisa diakses dari aplikasi.<br><br>
+                            <strong>Generate Trial harus klik tombol di Aplikasi dulu.</strong>
+                        </p>
+                        <a href="https://plutoxteam.github.io/Payment/" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 30px; font-weight: 600;">
+                            Kembali ke Halaman Utama
+                        </a>
+                    </div>
+                </div>
+            `;
+            // Hentikan eksekusi script
+            throw new Error('No device ID');
+        }
         
         // ============================================
-        // FUNGSI FORMAT NOMOR WA (otomatis)
+        // FUNGSI FORMAT NOMOR WA
         // ============================================
         function formatPhoneNumber(phone) {
-            // Hapus semua karakter non-digit
             let cleaned = phone.replace(/\D/g, '');
-            
-            // Jika diawali 0, ganti 62
             if (cleaned.startsWith('0')) {
                 cleaned = '62' + cleaned.substring(1);
-            }
-            // Jika tidak diawali 62, tambahkan 62
-            else if (!cleaned.startsWith('62')) {
+            } else if (!cleaned.startsWith('62')) {
                 cleaned = '62' + cleaned;
             }
-            
             return cleaned;
         }
         
@@ -331,12 +346,8 @@
             navigator.clipboard.writeText(text).then(() => {
                 const notification = document.getElementById('copyNotification');
                 notification.classList.add('show');
-                setTimeout(() => {
-                    notification.classList.remove('show');
-                }, 2000);
-            }).catch(err => {
-                alert('Gagal menyalin key. Silakan copy manual.');
-            });
+                setTimeout(() => notification.classList.remove('show'), 2000);
+            }).catch(() => alert('Gagal menyalin key'));
         };
         
         // ============================================
@@ -385,17 +396,10 @@
                     </div>
                 </div>
                 
-                <!-- TOMBOL BELI KE DOKU -->
                 <a href="${DOKU_LINK}" class="btn btn-buy" target="_blank">
                     💳 Beli Key Premium (Rp 50.000)
                 </a>
                 
-                <!-- TOMBOL TRIAL (HANYA MUNCUL DI BROWSER) -->
-                <a href="#" id="trialBtn" class="btn btn-trial" onclick="event.preventDefault(); window.location.href='?device_id=demo'">
-                    🎁 Coba Gratis 3 Hari (Demo)
-                </a>
-                
-                <!-- TOMBOL HUBUNGI ADMIN -->
                 <a href="https://wa.me/${ADMIN_PHONE}?text=Halo%20admin%20PlutoXTeam%2C%20saya%20ingin%20bertanya" class="btn btn-admin" target="_blank">
                     📞 Hubungi Admin (085849299253)
                 </a>
@@ -407,9 +411,9 @@
         }
         
         // ============================================
-        // RENDER HALAMAN TRIAL (DENGAN DEVICE ID)
+        // RENDER HALAMAN TRIAL (LOADING)
         // ============================================
-        function renderTrialPage(deviceId) {
+        function renderTrialPage() {
             return `
                 <div class="logo-container">
                     <img src="logo.png" alt="PlutoXTeam Logo" class="logo" id="mainLogo" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block'">
@@ -492,7 +496,6 @@
                     </div>
                 </div>
                 
-                <!-- TOMBOL BELI KE DOKU (TETAP ADA) -->
                 <a href="${DOKU_LINK}" class="btn btn-buy" target="_blank">
                     💳 Beli Key Premium (Rp 50.000)
                 </a>
@@ -508,8 +511,8 @@
                         
                         <div style="margin-bottom: 15px;">
                             <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 500;">Nomor WhatsApp</label>
-                            <input type="tel" id="trialPhone" placeholder="Contoh: 081234567890 atau 6281234567890" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
-                            <div style="font-size: 12px; color: #666; margin-top: 5px;">Bisa pakai 0 atau 62, nanti otomatis diformat</div>
+                            <input type="tel" id="trialPhone" placeholder="Contoh: 081234567890" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
+                            <div style="font-size: 12px; color: #666; margin-top: 5px;">Gunakan kode negara 62</div>
                         </div>
                         
                         <button onclick="generateTrialKey('${deviceId}')" style="background: #28a745; color: white; border: none; padding: 14px; border-radius: 30px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer;">
@@ -542,10 +545,7 @@
                 return;
             }
             
-            // Format nomor (otomatis)
             const formattedPhone = formatPhoneNumber(phone);
-            
-            // Disable tombol
             const btn = event.target;
             btn.disabled = true;
             btn.textContent = 'Memproses...';
@@ -564,15 +564,7 @@
             });
             
             try {
-                // Simpan ke Firebase (nomor sudah diformat)
-                await firebase.database().ref('trial_history/' + deviceId).set({
-                    key: key,
-                    lastTrialAt: Date.now(),
-                    name: name,
-                    phone: formattedPhone
-                });
-                
-                // Simpan key di Keys
+                // Simpan key di Keys (TANPA trial_history)
                 await firebase.database().ref('Keys/' + key).set({
                     Type: 'Duration',
                     Value: '3d',
@@ -581,7 +573,7 @@
                     Devices: null
                 });
                 
-                // Kirim via WHAPI (nomor sudah diformat)
+                // Kirim via WHAPI
                 try {
                     await fetch('https://gate.whapi.cloud/messages/text', {
                         method: 'POST',
@@ -604,30 +596,19 @@
                 document.getElementById('trialResult').innerHTML = `
                     <div class="success-box">
                         <h3>✅ Key Trial Berhasil!</h3>
-                        <div style="background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; text-align: left;">
-                            <div style="font-size: 14px; color: #666;">Nama: ${name}</div>
-                            <div style="font-size: 14px; color: #666;">WA: ${formattedPhone}</div>
-                            <div style="font-size: 14px; color: #666;">Berlaku hingga: ${expireStr}</div>
+                        <div style="background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                            <div>Nama: ${name}</div>
+                            <div>WA: ${formattedPhone}</div>
+                            <div>Berlaku hingga: ${expireStr}</div>
                         </div>
                         
-                        <div class="key-display" id="keyToCopy">
-                            ${key}
-                        </div>
+                        <div class="key-display">${key}</div>
                         
-                        <button onclick="copyKey('${key}')" class="btn btn-copy">
-                            📋 Copy Key
-                        </button>
+                        <button onclick="copyKey('${key}')" class="btn btn-copy">📋 Copy Key</button>
+                        <p style="margin: 15px 0;">Key telah dikirim ke WhatsApp Anda.</p>
                         
-                        <p style="color: #155724; margin: 15px 0;">Key telah dikirim ke WhatsApp Anda.</p>
-                        
-                        <!-- TOMBOL BELI PREMIUM TETAP ADA -->
-                        <a href="${DOKU_LINK}" class="btn btn-buy" target="_blank" style="margin-bottom: 10px;">
-                            💳 Beli Premium (Rp 50.000)
-                        </a>
-                        
-                        <button onclick="kembali()" class="btn" style="background: #28a745;">
-                            ✅ Kembali ke Halaman Utama
-                        </button>
+                        <a href="${DOKU_LINK}" class="btn btn-buy" target="_blank">💳 Beli Premium (Rp 50.000)</a>
+                        <button onclick="kembali()" class="btn" style="background: #28a745;">✅ Kembali</button>
                     </div>
                 `;
                 
@@ -655,28 +636,26 @@
         async function init() {
             const container = document.getElementById('mainContainer');
             
-            // JIKA TIDAK ADA DEVICE ID (akses dari browser biasa)
+            // Jika tidak ada device ID, tampilkan halaman utama
             if (!deviceId) {
                 container.innerHTML = renderHomePage();
                 return;
             }
             
-            // ADA DEVICE ID (akses dari APK)
-            container.innerHTML = renderTrialPage(deviceId);
+            // Ada device ID, tampilkan loading
+            container.innerHTML = renderTrialPage();
             
             try {
-                // Cek ke Firebase
+                // Cek trial_history (untuk informasi saja)
                 const snapshot = await firebase.database().ref('trial_history/' + deviceId).once('value');
                 
                 if (snapshot.exists()) {
-                    // UDAH PERNAH TRIAL
                     container.innerHTML = renderErrorPage(
                         'Trial Gagal',
                         'Device ini sudah pernah menggunakan trial sebelumnya.',
                         true
                     );
                 } else {
-                    // BELUM PERNAH TRIAL
                     container.innerHTML = renderTrialForm(deviceId);
                 }
             } catch (error) {
