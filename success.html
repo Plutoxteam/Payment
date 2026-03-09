@@ -198,6 +198,12 @@
             border: 1px solid #f5c6cb;
         }
         
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
         .btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -356,15 +362,10 @@
         const ADMIN_PHONE = '6285849299253';
         const WHAPI_TOKEN = 'dUtoaA65nf39YiR4oJweRlGP5fCPZXek';
         
-        // Ambil data dari URL
-        function getUrlParams() {
+        // Ambil invoice dari URL (INI SATU-SATUNYA YANG DARI DOKU)
+        function getInvoiceFromUrl() {
             const params = new URLSearchParams(window.location.search);
-            return {
-                invoice: params.get('invoice') || params.get('order_id') || 'INV-' + Date.now(),
-                amount: params.get('amount') || params.get('gross_amount') || '50000',
-                phone: params.get('phone') || params.get('customer_phone') || '',
-                name: params.get('name') || params.get('customer_name') || 'Pelanggan'
-            };
+            return params.get('invoice') || params.get('order_id') || 'INV-' + Date.now();
         }
         
         // Format Rupiah
@@ -515,9 +516,33 @@ Salam hangat,
             }
         }
         
-        // Simpan key ke Firebase
-        async function saveKeyToFirebase(key, invoice, phone, name) {
+        // 🔥 FUNGSI: Ambil data dari Firebase berdasarkan invoice
+        async function getTransactionFromFirebase(invoice) {
             try {
+                const snapshot = await firebase.database()
+                    .ref('transactions')
+                    .orderByChild('invoice')
+                    .equalTo(invoice)
+                    .limitToFirst(1)
+                    .once('value');
+                
+                const data = snapshot.val();
+                if (data) {
+                    // Ambil key pertama (karena filter invoice)
+                    const key = Object.keys(data)[0];
+                    return data[key];
+                }
+                return null;
+            } catch (error) {
+                console.error('Error ambil dari Firebase:', error);
+                return null;
+            }
+        }
+        
+        // 🔥 FUNGSI: Simpan key ke Firebase dengan referensi invoice
+        async function saveKeyToFirebase(key, invoice, phone, name, amount) {
+            try {
+                // Simpan di node Keys
                 await firebase.database().ref('Keys/' + key).set({
                     Type: 'Duration',
                     Value: '30d',
@@ -527,8 +552,21 @@ Salam hangat,
                     invoice: invoice,
                     phone: phone,
                     customerName: name,
-                    source: 'doku_payment'
+                    source: 'doku_payment',
+                    amount: amount,
+                    created: Date.now()
                 });
+                
+                // Simpan juga di node transactions untuk lookup by invoice
+                await firebase.database().ref('transactions/' + invoice).set({
+                    key: key,
+                    phone: phone,
+                    customerName: name,
+                    amount: amount,
+                    status: 'paid',
+                    created: Date.now()
+                });
+                
                 console.log('✅ Key tersimpan di Firebase');
                 return true;
             } catch (error) {
@@ -548,30 +586,78 @@ Salam hangat,
             document.getElementById('logoFallback').style.display = 'block';
         };
         
-        // Inisiasi
+        // INISIASI: Ambil invoice dari URL, lalu cari data di Firebase
         window.onload = async function() {
-            const data = getUrlParams();
+            const invoice = getInvoiceFromUrl();
             
-            // Format nomor untuk tampilan lokal (08xxx)
-            const localPhone = formatPhoneLocal(data.phone);
+            // Tampilkan loading
+            document.getElementById('keyDisplay').textContent = 'Mencari data...';
+            document.getElementById('phoneDisplay').textContent = 'Memuat...';
+            document.getElementById('customerName').textContent = 'Memuat...';
+            document.getElementById('invoice').textContent = invoice;
             
-            // Update tampilan
-            document.getElementById('invoice').textContent = data.invoice;
-            document.getElementById('amount').textContent = formatRupiah(data.amount);
-            document.getElementById('time').textContent = getCurrentTime();
-            document.getElementById('phoneDisplay').textContent = localPhone;
-            document.getElementById('phoneLink').textContent = localPhone;
-            document.getElementById('customerName').textContent = data.name;
+            // Coba ambil data dari Firebase (yang sudah diisi webhook)
+            const transaction = await getTransactionFromFirebase(invoice);
             
-            // Generate key (lebih pendek)
-            const licenseKey = generateKey();
-            document.getElementById('keyDisplay').textContent = licenseKey;
-            
-            // Simpan key ke Firebase
-            await saveKeyToFirebase(licenseKey, data.invoice, data.phone, data.name);
-            
-            // Kirim WA
-            await sendViaWhapi(data.phone, licenseKey, data.invoice, data.amount, data.name);
+            if (transaction) {
+                // DATA DITEMUKAN! Pakai data dari Firebase
+                const phone = transaction.phone || '';
+                const name = transaction.customerName || 'Pelanggan';
+                const amount = transaction.amount || 50000;
+                const existingKey = transaction.key;
+                
+                // Format nomor untuk tampilan
+                const localPhone = formatPhoneLocal(phone);
+                
+                // Update tampilan
+                document.getElementById('amount').textContent = formatRupiah(amount);
+                document.getElementById('time').textContent = getCurrentTime();
+                document.getElementById('phoneDisplay').textContent = localPhone;
+                document.getElementById('phoneLink').textContent = localPhone;
+                document.getElementById('customerName').textContent = name;
+                
+                if (existingKey) {
+                    // Key sudah ada, tampilkan
+                    document.getElementById('keyDisplay').textContent = existingKey;
+                    
+                    // Kirim WA
+                    await sendViaWhapi(phone, existingKey, invoice, amount, name);
+                } else {
+                    // Key belum ada (seharusnya tidak terjadi)
+                    const newKey = generateKey();
+                    document.getElementById('keyDisplay').textContent = newKey;
+                    await saveKeyToFirebase(newKey, invoice, phone, name, amount);
+                    await sendViaWhapi(phone, newKey, invoice, amount, name);
+                }
+                
+            } else {
+                // DATA BELUM ADA - mungkin webhook belum masuk atau invoice salah
+                document.getElementById('keyDisplay').textContent = 'Menunggu konfirmasi...';
+                document.getElementById('phoneDisplay').textContent = 'Sedang diproses';
+                document.getElementById('customerName').textContent = 'Pelanggan';
+                document.getElementById('time').textContent = getCurrentTime();
+                
+                // Tampilkan pesan
+                const statusDiv = document.getElementById('waStatus');
+                statusDiv.style.display = 'block';
+                statusDiv.className = 'status-message status-warning';
+                statusDiv.innerHTML = '⏳ Pembayaran sedang dikonfirmasi. Key akan muncul otomatis dalam beberapa detik...';
+                
+                // Coba lagi setiap 3 detik (sampai 10 kali)
+                let retry = 0;
+                const interval = setInterval(async () => {
+                    retry++;
+                    const retryData = await getTransactionFromFirebase(invoice);
+                    
+                    if (retryData) {
+                        clearInterval(interval);
+                        window.location.reload(); // Refresh halaman dengan data baru
+                    } else if (retry >= 10) {
+                        clearInterval(interval);
+                        document.getElementById('keyDisplay').textContent = 'Gagal memuat. Hubungi admin.';
+                    }
+                }, 3000);
+            }
         };
     </script>
 </body>
