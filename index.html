@@ -274,16 +274,10 @@
         const deviceId = urlParams.get('device_id');
         
         // ============================================
-        // FUNGSI KEMBALI KE APLIKASI
+        // FUNGSI KEMBALI KE HALAMAN UTAMA
         // ============================================
         window.kembali = function() {
-            // Coba buka aplikasi via deep link
-            window.location.href = 'intent://#Intent;scheme=package:com.sidianbarut2027;package=com.sidianbarut2027;end';
-            
-            // Fallback: kalau aplikasi gak terinstall, balik ke halaman utama
-            setTimeout(function() {
-                window.location.href = 'https://plutoxteam.github.io/Payment/';
-            }, 1000);
+            window.location.href = 'https://plutoxteam.github.io/Payment/';
         };
         
         // ============================================
@@ -383,7 +377,7 @@
                     ${showBuy ? `<p>Silakan beli key premium untuk melanjutkan.</p>` : ''}
                     ${showBuy ? `<a href="${DOKU_LINK}" class="btn btn-buy" target="_blank">💳 Beli Premium (Rp 50.000)</a>` : ''}
                     <button onclick="kembali()" class="btn" style="background: #28a745;">
-                        ✅ Kembali ke Aplikasi
+                        ✅ Kembali ke Halaman Utama
                     </button>
                 </div>
                 
@@ -564,7 +558,7 @@
                         </a>
                         
                         <button onclick="kembali()" class="btn" style="background: #28a745;">
-                            ✅ Kembali ke Aplikasi
+                            ✅ Kembali ke Halaman Utama
                         </button>
                     </div>
                 `;
