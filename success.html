@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
+        /* CSS SAMA PERSIS DENGAN KODE LO */
         * {
             margin: 0;
             padding: 0;
@@ -241,7 +242,7 @@
             background: #667eea;
             margin-top: 15px;
         }
-
+        
         .btn-payment {
             background: #f0933b;
         }
@@ -372,7 +373,6 @@
             <p>Anda kembali ke merchant sebelum menyelesaikan pembayaran.</p>
             <p>Silakan selesaikan pembayaran Anda di halaman DOKU.</p>
             <p style="margin-top: 15px; font-size: 13px;">Jika sudah membayar, tunggu beberapa saat hingga notifikasi masuk.</p>
-            <!-- TOMBOL KE PEMBAYARAN TETAP ADA -->
             <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-payment" style="margin-top: 15px;">
                 💳 Kembali ke Halaman Pembayaran
             </a>
@@ -560,6 +560,7 @@ Terima kasih telah melakukan pembayaran. Berikut adalah detail transaksi dan key
 • Total       : ${formattedAmount}
 • Waktu       : ${currentTime}
 • Masa Berlaku: 30 hari (hingga ${expireDate})
+• Invoice     : ${invoice}
 
 📌 *CARA AKTIVASI*
 1. Buka aplikasi
@@ -605,42 +606,71 @@ Salam hangat,
             document.getElementById('logoFallback').style.display = 'block';
         };
         
-        // ================== MAIN FUNCTION (FIXED!) ==================
+        // ================== MAIN FUNCTION (FIXED - PAKE KODE 1) ==================
         
         window.onload = async function() {
             try {
                 // Ambil parameter dari URL
                 const urlParams = new URLSearchParams(window.location.search);
                 
-                // PARAMETER SESUAI SCREENSHOT DOKU
-                const invoice = urlParams.get('invoice') || 
-                               urlParams.get('order_number') || 
-                               urlParams.get('INVOICE') ||
-                               'Tidak ada';
+                // TAMPILKAN SEMUA PARAMETER BUAT DEBUG
+                console.log('🔍 SEMUA PARAMETER URL:');
+                urlParams.forEach((value, key) => {
+                    console.log(`${key}: ${value}`);
+                });
                 
-                const status = urlParams.get('status') || 'Pending';
+                // AMBIL DATA DENGAN SEGALA KEMUNGKINAN NAMA PARAMETER
+                const invoice = urlParams.get('invoice') || 
+                               urlParams.get('INVOICE') || 
+                               urlParams.get('order_number') ||
+                               urlParams.get('reference_id') ||
+                               urlParams.get('payment_refence_id') ||
+                               '';
+                
+                // AMBIL STATUS DARI BEBERAPA KEMUNGKINAN
+                const statusText = urlParams.get('status') || 
+                                  urlParams.get('STATUS') || 
+                                  urlParams.get('result') || 
+                                  '';
+                
+                // AMBIL PAYMENT_STATUS (YANG NILAINYA 1)
+                const paymentStatus = urlParams.get('payment_status') || 
+                                     urlParams.get('PAYMENT_STATUS') || 
+                                     '';
+                
+                // AMBIL NOMOR TELEPON
                 const phone = urlParams.get('phone') || 
-                             urlParams.get('customer_phone') || 
                              urlParams.get('PHONE') || 
+                             urlParams.get('customer_phone') || 
+                             urlParams.get('customField2') ||
                              '';
                 
-                console.log('URL Params:', { invoice, status, phone });
+                console.log('📱 DATA DIDAPAT:', { 
+                    invoice, 
+                    statusText, 
+                    paymentStatus, 
+                    phone 
+                });
                 
-                // CEK APAKAH STATUS = "Success" (sesuai screenshot)
-                // Gunakan perbandingan case-insensitive untuk amannya
-                const isSuccess = status.toLowerCase() === 'success';
+                // CEK APAKAH SUKSES BERDASARKAN KODE 1 (payment_status=1)
+                // ATAU STATUS TEXT = SUCCESS
+                const isSuccess = paymentStatus === '1' || 
+                                 paymentStatus === 1 ||
+                                 statusText.toUpperCase() === 'SUCCESS' ||
+                                 statusText.toLowerCase() === 'success';
                 
-                if (!invoice || invoice === 'Tidak ada' || !isSuccess) {
+                // CEK APAKAH INI DARI KEMBALI KE MERCHANT ATAU SUKSES?
+                if (!invoice || !isSuccess) {
                     // Tampilkan area pending
                     document.getElementById('pendingArea').style.display = 'block';
                     document.getElementById('successArea').classList.add('hidden');
                     
-                    // Update tampilan pending dengan invoice & status
+                    // Update tampilan pending dengan data yang ada
                     document.getElementById('pendingArea').innerHTML = `
                         <h3>⏳ Menunggu Pembayaran</h3>
                         <p>Anda kembali ke merchant sebelum menyelesaikan pembayaran.</p>
-                        <p style="margin-top: 10px;"><strong>Invoice:</strong> ${invoice}</p>
-                        <p><strong>Status:</strong> ${status}</p>
+                        <p style="margin-top: 10px;"><strong>Invoice:</strong> ${invoice || 'Tidak ada'}</p>
+                        <p><strong>Status:</strong> ${statusText || 'PENDING'} (payment_status: ${paymentStatus || '-'})</p>
                         <p>Silakan selesaikan pembayaran Anda di halaman DOKU.</p>
                         <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-payment" style="margin-top: 15px;">
                             💳 Kembali ke Halaman Pembayaran
@@ -652,7 +682,7 @@ Salam hangat,
                     return;
                 }
                 
-                // JIKA SAMPAI SINI, BERARTI STATUS Success DAN ADA INVOICE
+                // JIKA SAMPAI SINI, BERARTI SUKSES (payment_status=1 ATAU STATUS=SUCCESS)
                 
                 // Sembunyikan pending, tampilkan success
                 document.getElementById('pendingArea').style.display = 'none';
