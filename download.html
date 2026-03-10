@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Download SIDIAN REVOLUTION - PlutoXTeam</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            padding: 16px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 24px;
+            padding: 32px 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            animation: slideUp 0.6s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(102, 126, 234, 0.1) 50%, transparent 70%);
+            animation: shine 3s infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 20px 40px rgba(102, 126, 234, 0.5);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            }
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+        
+        .logo-container {
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .logo {
+            max-width: 120px;
+            max-height: 80px;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+        
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 8px;
+            font-weight: 800;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 24px;
+            font-size: 16px;
+        }
+        
+        .version-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 30px;
+            display: inline-block;
+            margin-bottom: 24px;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .features {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            text-align: left;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            animation: slideIn 0.5s ease;
+            animation-fill-mode: both;
+        }
+        
+        .feature-item:nth-child(1) { animation-delay: 0.1s; }
+        .feature-item:nth-child(2) { animation-delay: 0.2s; }
+        .feature-item:nth-child(3) { animation-delay: 0.3s; }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .feature-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+        
+        .feature-text {
+            flex: 1;
+        }
+        
+        .feature-text strong {
+            display: block;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 2px;
+        }
+        
+        .feature-text span {
+            color: #888;
+            font-size: 13px;
+        }
+        
+        .file-info {
+            background: #e8f0fe;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #cce5ff;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .file-size {
+            color: #888;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        
+        .file-badge {
+            background: #28a745;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+            border: none;
+            padding: 18px 32px;
+            border-radius: 50px;
+            width: 100%;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 20px 0;
+            text-decoration: none;
+            box-shadow: 0 10px 30px rgba(46, 204, 113, 0.3);
+            animation: pulse 2s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(46, 204, 113, 0.4);
+        }
+        
+        .download-btn:active {
+            transform: translateY(0);
+        }
+        
+        .download-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .download-btn:hover::before {
+            left: 100%;
+        }
+        
+        .download-icon {
+            margin-right: 10px;
+            font-size: 24px;
+        }
+        
+        .manual-link {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            font-size: 14px;
+            word-break: break-all;
+        }
+        
+        .manual-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .manual-link a:hover {
+            text-decoration: underline;
+        }
+        
+        .countdown {
+            font-size: 14px;
+            color: #888;
+            margin: 10px 0;
+        }
+        
+        .whatsapp-btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            padding: 14px 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+        }
+        
+        .whatsapp-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4);
+        }
+        
+        .footer {
+            margin-top: 24px;
+            color: #999;
+            font-size: 12px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        
+        .footer strong {
+            color: #667eea;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            opacity: 1;
+        }
+        
+        .particle {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .particle span {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: particle 3s infinite;
+        }
+        
+        @keyframes particle {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #eaeaea;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="particle" id="particle"></div>
+    
+    <div class="container">
+        <div class="logo-container">
+            <img src="logo.png" alt="PlutoXTeam Logo" class="logo" id="mainLogo" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block'">
+            <div class="logo-fallback" id="logoFallback" style="display:none; font-size: 32px; font-weight: 800; color: #667eea;">
+                Pluto<span style="color: #764ba2;">XTeam</span>
+            </div>
+        </div>
+        
+        <h1>SIDIAN REVOLUTION</h1>
+        <div class="subtitle">Aplikasi Mod PlutoXTeam</div>
+        
+        <div class="version-badge">
+            ⚡ Versi 23.0 | Update Terbaru
+        </div>
+        
+        <div class="features">
+            <div class="feature-item">
+                <div class="feature-icon">✓</div>
+                <div class="feature-text">
+                    <strong>Fitur Tanpa Batas</strong>
+                    <span>Fitur Fake GPS</span>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-text">
+                    <strong>Tanpa Deteksi</strong>
+                    <span>Bebas Iklan</span>
+                </div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🔄</div>
+                <div class="feature-text">
+                    <strong>Update Gratis</strong>
+                    <span>Dapatkan update terbaru</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="file-info">
+            <div>
+                <div class="file-name">📱 SIDIAN.REVOLUTION_signed.apk</div>
+                <div class="file-size">Ukuran: ±58,1 MB</div>
+            </div>
+            <div class="file-badge">Ready</div>
+        </div>
+        
+        <!-- DOWNLOAD BUTTON -->
+        <a href="https://github.com/Plutoxteam/Payment/releases/download/releases/SIDIAN.REVOLUTION_signed.apk" 
+           class="download-btn" 
+           id="downloadBtn"
+           onclick="startDownload()">
+            <span class="download-icon">📲</span>
+            DOWNLOAD APK
+        </a>
+        
+        <div class="countdown" id="countdown"></div>
+        
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <div class="manual-link">
+            🔗 Link cadangan: <br>
+            <a href="https://github.com/Plutoxteam/Payment/releases/download/releases/SIDIAN.REVOLUTION_signed.apk" 
+               target="_blank" 
+               id="directLink">
+                github.com/Plutoxteam/Payment/releases/...
+            </a>
+            <br>
+            <button onclick="copyLink()" style="background: none; border: none; color: #667eea; cursor: pointer; margin-top: 8px;">
+                📋 Copy Link
+            </button>
+        </div>
+        
+        <a href="https://wa.me/6285849299253?text=Halo%20admin%20PlutoXTeam%2C%20saya%20mau%20tanya%20soal%20aplikasi%20SIDIAN%20REVOLUTION" 
+           class="whatsapp-btn" 
+           target="_blank">
+            📞 Hubungi Admin (085849299253)
+        </a>
+        
+        <div class="footer">
+            <strong>PlutoXTeam</strong> • Download langsung aman
+        </div>
+    </div>
+    
+    <div class="toast" id="toast">✅ Link berhasil disalin!</div>
+    
+    <script>
+        // Fungsi copy link
+        function copyLink() {
+            const link = document.getElementById('directLink').href;
+            navigator.clipboard.writeText(link).then(() => {
+                const toast = document.getElementById('toast');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            });
+        }
+        
+        // Fungsi start download (animasi)
+        function startDownload() {
+            const btn = document.getElementById('downloadBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            const countdown = document.getElementById('countdown');
+            
+            // Ubah teks button
+            btn.innerHTML = '<span class="download-icon">⏳</span> MENGUNDUH...';
+            btn.style.animation = 'none';
+            btn.style.background = 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)';
+            
+            // Tampilkan progress bar
+            progressBar.style.display = 'block';
+            
+            // Simulasi progress
+            let width = 0;
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        btn.innerHTML = '<span class="download-icon">📲</span> DOWNLOAD LAGI';
+                        btn.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
+                        btn.style.animation = 'pulse 2s infinite';
+                        progressBar.style.display = 'none';
+                        countdown.innerHTML = '';
+                    }, 1000);
+                } else {
+                    width += Math.random() * 10;
+                    if (width > 100) width = 100;
+                    progressFill.style.width = width + '%';
+                    countdown.innerHTML = `⏳ Mengunduh... ${Math.round(width)}%`;
+                }
+            }, 200);
+            
+            // Reset countdown setelah 5 detik kalo download belum mulai
+            setTimeout(() => {
+                if (width < 100) {
+                    countdown.innerHTML = '⏳ Jika download tidak dimulai, klik link cadangan di bawah.';
+                }
+            }, 5000);
+        }
+        
+        // Particle effect
+        function createParticles() {
+            const particle = document.getElementById('particle');
+            for (let i = 0; i < 20; i++) {
+                const span = document.createElement('span');
+                span.style.left = Math.random() * 100 + '%';
+                span.style.animationDelay = Math.random() * 3 + 's';
+                span.style.width = Math.random() * 10 + 5 + 'px';
+                span.style.height = span.style.width;
+                particle.appendChild(span);
+            }
+        }
+        
+        // Handle logo error
+        window.onload = function() {
+            createParticles();
+            
+            // Cek apakah ada parameter ref (untuk tracking)
+            const params = new URLSearchParams(window.location.search);
+            const ref = params.get('ref');
+            if (ref) {
+                console.log('Download dari referal:', ref);
+                // Bisa kirim ke analytics kalo mau
+            }
+        };
+        
+        window.handleLogoError = function() {
+            document.getElementById('mainLogo').style.display = 'none';
+            document.getElementById('logoFallback').style.display = 'block';
+        };
+        
+        // Auto redirect? Gak usah, biar user klik
+        // Tapi kalo mau pake auto redirect, uncomment ini:
+        /*
+        setTimeout(() => {
+            window.location.href = 'https://github.com/Plutoxteam/Payment/releases/download/releases/SIDIAN.REVOLUTION_signed.apk';
+        }, 3000);
+        */
+    </script>
+</body>
+</html>
