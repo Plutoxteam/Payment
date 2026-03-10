@@ -320,6 +320,35 @@
             font-weight: 600;
         }
         
+        .btn {
+            display: block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 30px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 12px 0;
+            text-decoration: none;
+        }
+        
+        .btn-back {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
         .whatsapp-btn {
             display: inline-block;
             background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
@@ -331,6 +360,7 @@
             margin-top: 20px;
             transition: all 0.3s;
             box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+            width: 100%;
         }
         
         .whatsapp-btn:hover {
@@ -406,13 +436,13 @@
     
     <div class="container">
         <div class="logo-container">
-            <img src="logo.png" alt="PlutoXTeam Logo" class="logo" id="mainLogo" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block'">
+            <img src="aaa.png" alt="PlutoXTeam Logo" class="logo" id="mainLogo" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block'">
             <div class="logo-fallback" id="logoFallback" style="display:none; font-size: 32px; font-weight: 800; color: #667eea;">
                 Pluto<span style="color: #764ba2;">XTeam</span>
             </div>
         </div>
         
-        <h1>Aplikasi Mod PlutoXTeam</h1>
+        <h1>SIDIAN REVOLUTION</h1>
         <div class="subtitle">Versi 23.0 | Update Terbaru</div>
         
         <div class="version-badge">
@@ -431,7 +461,7 @@
                 <div class="feature-icon">⚡</div>
                 <div class="feature-text">
                     <strong>Tanpa Deteksi</strong>
-                    <span>(SAFE) Dijamin Aman</span>
+                    <span>(SAFE) Aman</span>
                 </div>
             </div>
             <div class="feature-item">
@@ -470,6 +500,11 @@
            class="whatsapp-btn" 
            target="_blank">
             📞 Hubungi Admin (085849299253)
+        </a>
+        
+        <!-- TOMBOL KEMBALI KE MENU UTAMA (BARU!) -->
+        <a href="index.html" class="btn btn-back">
+            ⬅️ Kembali ke Menu Utama
         </a>
         
         <div class="footer">
