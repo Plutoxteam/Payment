@@ -241,6 +241,10 @@
             background: #667eea;
             margin-top: 15px;
         }
+
+        .btn-payment {
+            background: #f0933b;
+        }
         
         .footer {
             margin-top: 24px;
@@ -368,7 +372,8 @@
             <p>Anda kembali ke merchant sebelum menyelesaikan pembayaran.</p>
             <p>Silakan selesaikan pembayaran Anda di halaman DOKU.</p>
             <p style="margin-top: 15px; font-size: 13px;">Jika sudah membayar, tunggu beberapa saat hingga notifikasi masuk.</p>
-            <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-premium" style="background: #f0933b; margin-top: 15px;">
+            <!-- TOMBOL KE PEMBAYARAN TETAP ADA -->
+            <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-payment" style="margin-top: 15px;">
                 💳 Kembali ke Halaman Pembayaran
             </a>
             <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 10px;">
@@ -600,49 +605,44 @@ Salam hangat,
             document.getElementById('logoFallback').style.display = 'block';
         };
         
-        // ================== MAIN FUNCTION ==================
+        // ================== MAIN FUNCTION (FIXED!) ==================
         
         window.onload = async function() {
             try {
                 // Ambil parameter dari URL
                 const urlParams = new URLSearchParams(window.location.search);
                 
-                // Coba ambil invoice dari berbagai kemungkinan parameter
+                // PARAMETER SESUAI SCREENSHOT DOKU
                 const invoice = urlParams.get('invoice') || 
-                               urlParams.get('INVOICE') || 
-                               urlParams.get('order_id') ||
-                               urlParams.get('ORDER_ID') ||
-                               urlParams.get('trx_id');
+                               urlParams.get('order_number') || 
+                               urlParams.get('INVOICE') ||
+                               'Tidak ada';
                 
-                // Coba ambil status
-                const status = urlParams.get('status') || 
-                              urlParams.get('result') || 
-                              urlParams.get('STATUS') || 
-                              'UNKNOWN';
-                
-                // Coba ambil nomor telepon (opsional)
+                const status = urlParams.get('status') || 'Pending';
                 const phone = urlParams.get('phone') || 
-                             urlParams.get('PHONE') || 
                              urlParams.get('customer_phone') || 
+                             urlParams.get('PHONE') || 
                              '';
                 
                 console.log('URL Params:', { invoice, status, phone });
                 
-                // CEK APAKAH INI DARI KEMBALI KE MERCHANT ATAU SUKSES?
-                // Jika tidak ada invoice, atau status bukan SUCCESS -> ANGGAP PENDING
-                if (!invoice || status.toUpperCase() !== 'SUCCESS') {
+                // CEK APAKAH STATUS = "Success" (sesuai screenshot)
+                // Gunakan perbandingan case-insensitive untuk amannya
+                const isSuccess = status.toLowerCase() === 'success';
+                
+                if (!invoice || invoice === 'Tidak ada' || !isSuccess) {
                     // Tampilkan area pending
                     document.getElementById('pendingArea').style.display = 'block';
                     document.getElementById('successArea').classList.add('hidden');
                     
-                    // Update status message
+                    // Update tampilan pending dengan invoice & status
                     document.getElementById('pendingArea').innerHTML = `
                         <h3>⏳ Menunggu Pembayaran</h3>
                         <p>Anda kembali ke merchant sebelum menyelesaikan pembayaran.</p>
-                        <p style="margin-top: 10px;"><strong>Invoice:</strong> ${invoice || 'Tidak ada'}</p>
-                        <p><strong>Status:</strong> ${status || 'PENDING'}</p>
+                        <p style="margin-top: 10px;"><strong>Invoice:</strong> ${invoice}</p>
+                        <p><strong>Status:</strong> ${status}</p>
                         <p>Silakan selesaikan pembayaran Anda di halaman DOKU.</p>
-                        <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-premium" style="background: #f0933b; margin-top: 15px;">
+                        <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-payment" style="margin-top: 15px;">
                             💳 Kembali ke Halaman Pembayaran
                         </a>
                         <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 10px;">
@@ -652,7 +652,7 @@ Salam hangat,
                     return;
                 }
                 
-                // JIKA SAMPAI SINI, BERARTI STATUS SUCCESS DAN ADA INVOICE
+                // JIKA SAMPAI SINI, BERARTI STATUS Success DAN ADA INVOICE
                 
                 // Sembunyikan pending, tampilkan success
                 document.getElementById('pendingArea').style.display = 'none';
