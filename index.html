@@ -70,169 +70,104 @@
             color: #764ba2;
         }
         
-        h2 {
+        h1 {
             color: #333;
+            font-size: 28px;
             margin-bottom: 8px;
-            font-size: 22px;
         }
         
         .subtitle {
             color: #666;
-            font-size: 14px;
-            margin-bottom: 28px;
-            line-height: 1.5;
+            margin-bottom: 24px;
+            font-size: 16px;
         }
         
         .features {
             background: #f8f9fa;
             border-radius: 16px;
-            padding: 16px;
+            padding: 20px;
             margin-bottom: 24px;
             text-align: left;
-            border: 1px solid #eaeaea;
         }
         
         .feature-item {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 8px 0;
-            border-bottom: 1px dashed #ddd;
+            margin-bottom: 15px;
         }
         
         .feature-item:last-child {
-            border-bottom: none;
+            margin-bottom: 0;
         }
         
         .feature-icon {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             background: #e8f0fe;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: #667eea;
-            font-weight: bold;
+            font-weight: 700;
         }
         
         .feature-text {
             flex: 1;
-            color: #555;
-            font-size: 14px;
         }
         
         .feature-text strong {
-            color: #333;
             display: block;
+            color: #333;
             font-size: 15px;
+        }
+        
+        .feature-text small {
+            color: #888;
+            font-size: 13px;
         }
         
         .btn {
             display: block;
-            padding: 16px 24px;
-            border-radius: 30px;
-            font-size: 16px;
-            font-weight: 600;
-            text-decoration: none;
-            margin: 12px 0;
-            transition: transform 0.2s, box-shadow 0.2s;
-            border: none;
-            width: 100%;
-            cursor: pointer;
-        }
-        
-        .btn-buy {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            border: none;
+            padding: 16px 24px;
+            border-radius: 30px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 12px 0;
+            text-decoration: none;
+            border: none;
+        }
+        
+        .btn-premium {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
         }
         
         .btn-trial {
-            background: white;
-            color: #333;
-            border: 2px solid #ddd;
+            background: linear-gradient(135deg, #f0933b 0%, #e67e22 100%);
         }
         
         .btn-admin {
-            background: #25D366;
-            color: white;
-            margin-top: 5px;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
         }
         
         .btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
         
-        .btn-buy:hover {
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-        }
-        
-        .btn-trial:hover {
-            background: #f5f5f5;
-            border-color: #667eea;
-        }
-        
-        .btn-admin:hover {
-            background: #128C7E;
-        }
-        
-        .btn-copy {
-            background: #6c757d;
-            color: white;
-            margin-top: 5px;
-        }
-        
-        .btn-copy:hover {
-            background: #5a6268;
-        }
-        
-        .error-box {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            border-radius: 16px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-        
-        .error-box h3 {
-            color: #721c24;
-            margin-bottom: 10px;
-        }
-        
-        .error-box p {
-            color: #721c24;
-            margin-bottom: 15px;
-        }
-        
-        .success-box {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            border-radius: 16px;
-            padding: 20px;
-            margin: 20px 0;
-        }
-        
-        .success-box h3 {
-            color: #155724;
-            margin-bottom: 10px;
-        }
-        
-        .key-display {
-            background: #155724;
-            color: white;
-            border-radius: 10px;
-            padding: 20px;
-            font-family: monospace;
-            font-size: 18px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            margin: 15px 0;
-            word-break: break-all;
+        .btn:active {
+            transform: translateY(0);
         }
         
         .footer {
-            margin-top: 20px;
+            margin-top: 24px;
             color: #999;
             font-size: 12px;
             border-top: 1px solid #eee;
@@ -243,310 +178,342 @@
             color: #667eea;
         }
         
-        .loading {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
+        /* NOTIFIKASI */
+        .notification {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+            animation: slideIn 0.3s ease;
         }
         
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
-        .copy-notification {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #333;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 30px;
+        .notification-title {
+            font-weight: 700;
+            color: #0c5460;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .notification-message {
+            color: #0c5460;
             font-size: 14px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
+            margin-left: 28px;
         }
         
-        .copy-notification.show {
-            opacity: 1;
+        /* FORM TRIAL */
+        .trial-form {
+            background: #f0f7ff;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+            border: 1px solid #cce5ff;
+        }
+        
+        .trial-form h3 {
+            color: #0056b3;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            border-radius: 30px;
+            font-size: 15px;
+            transition: border 0.2s;
+        }
+        
+        .form-group input:focus {
+            border-color: #0056b3;
+            outline: none;
+        }
+        
+        .form-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            margin-left: 16px;
+        }
+        
+        .key-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            font-family: monospace;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin: 15px 0;
+            word-break: break-all;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div class="container" id="mainContainer">
-        <!-- Konten akan diisi oleh JavaScript -->
+    <div class="container">
+        <div class="logo-container">
+            <img src="logo.png" alt="PlutoXTeam Logo" class="logo" id="mainLogo" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block'">
+            <div class="logo-fallback" id="logoFallback" style="display:none;">
+                Pluto<span>XTeam</span>
+            </div>
+        </div>
+        
+        <!-- NOTIFIKASI AREA (akan tampil jika perlu) -->
+        <div id="notificationArea"></div>
+        
+        <!-- MENU UTAMA (default) -->
+        <div id="mainMenu">
+            <h1>Pilih Opsi Aktivasi</h1>
+            <div class="subtitle">Dapatkan akses premium ke PlutoXTeam</div>
+            
+            <div class="features">
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">
+                        <strong>Akses Penuh</strong>
+                        <small>Semua fitur aplikasi</small>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-text">
+                        <strong>Tanpa Iklan</strong>
+                        <small>Bebas gangguan iklan</small>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔄</div>
+                    <div class="feature-text">
+                        <strong>Update Gratis</strong>
+                        <small>Semua pembaruan terbaru</small>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TOMBOL BELI PREMIUM (LANGSUNG KE DOKU) -->
+            <a href="https://sandbox.doku.com/p-link/..." class="btn btn-premium" target="_blank">
+                💳 Beli Key Premium (Rp 50.000)
+            </a>
+            
+            <!-- TOMBOL TRIAL (CEK DEVICE ID DULU) -->
+            <button onclick="handleTrialClick()" class="btn btn-trial" id="trialButton">
+                🎁 Coba Gratis 3 Hari
+            </button>
+            
+            <!-- TOMBOL ADMIN -->
+            <a href="https://wa.me/6285849299253?text=Halo%20admin%20PlutoXTeam%2C%20saya%20ingin%20bertanya" class="btn btn-admin" target="_blank">
+                📞 Hubungi Admin (085849299253)
+            </a>
+            
+            <div class="footer">
+                <strong>PlutoXTeam</strong> · Pilih sesuai kebutuhan
+            </div>
+        </div>
+        
+        <!-- AREA TRIAL (akan tampil jika device_id ada) -->
+        <div id="trialArea" class="hidden"></div>
     </div>
     
-    <div class="copy-notification" id="copyNotification">✅ Key berhasil disalin</div>
-    
     <script>
-        // ============================================
-        // KONFIGURASI
-        // ============================================
+        // Konfigurasi Firebase
         const firebaseConfig = {
             databaseURL: "https://sidiannext-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
         firebase.initializeApp(firebaseConfig);
         
-        const WHAPI_TOKEN = 'dUtoaA65nf39YiR4oJweRlGP5fCPZXek';
         const ADMIN_PHONE = '6285849299253';
-        const DOKU_LINK = 'https://sandbox.doku.com/p-link/p/HDLMKO9gb3';
+        const WHAPI_TOKEN = 'dUtoaA65nf39YiR4oJweRlGP5fCPZXek';
+        const DOKU_LINK = 'https://sandbox.doku.com/p-link/...'; // Ganti dengan link DOKU asli
         
-        // ============================================
-        // CEK DEVICE ID DARI URL
-        // ============================================
-        const urlParams = new URLSearchParams(window.location.search);
-        const deviceId = urlParams.get('device_id');
-        
-        // ============================================
-        // FUNGSI FORMAT NOMOR WA
-        // ============================================
+        /**
+         * Format nomor WA ke format internasional
+         */
         function formatPhoneNumber(phone) {
             let cleaned = phone.replace(/\D/g, '');
             if (cleaned.startsWith('0')) {
-                cleaned = '62' + cleaned.substring(1);
-            } else if (!cleaned.startsWith('62')) {
-                cleaned = '62' + cleaned;
+                return '62' + cleaned.substring(1);
+            }
+            if (!cleaned.startsWith('62')) {
+                return '62' + cleaned;
             }
             return cleaned;
         }
         
-        // ============================================
-        // FUNGSI COPY KE CLIPBOARD
-        // ============================================
-        window.copyKey = function(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                const notification = document.getElementById('copyNotification');
-                notification.classList.add('show');
-                setTimeout(() => notification.classList.remove('show'), 2000);
-            }).catch(() => alert('Gagal menyalin key'));
-        };
+        /**
+         * Tampilkan notifikasi keren
+         */
+        function showNotification(type, title, message) {
+            const area = document.getElementById('notificationArea');
+            const icons = {
+                warning: '⚠️',
+                error: '❌',
+                success: '✅',
+                info: 'ℹ️'
+            };
+            
+            area.innerHTML = `
+                <div class="notification ${type}">
+                    <div class="notification-title">
+                        <span>${icons[type] || 'ℹ️'}</span>
+                        <span>${title}</span>
+                    </div>
+                    <div class="notification-message">${message}</div>
+                </div>
+            `;
+        }
         
-        // ============================================
-        // FUNGSI KEMBALI KE HALAMAN UTAMA
-        // ============================================
-        window.kembali = function() {
-            window.location.href = 'https://plutoxteam.github.io/Payment/';
-        };
-        
-        // ============================================
-        // FUNGSI CEK SEBELUM TRIAL
-        // ============================================
-        window.checkTrialAccess = function() {
+        /**
+         * Handle klik tombol trial
+         */
+        function handleTrialClick() {
+            // Ambil device_id dari URL
+            const params = new URLSearchParams(window.location.search);
+            const deviceId = params.get('device_id');
+            
             if (!deviceId) {
-                alert('❌ Untuk mendapatkan key trial, Anda harus membukanya dari aplikasi dengan klik tombol "Buy Key".');
-                return false;
+                showNotification('warning', 'Akses Trial Dibatasi', 
+                    'Untuk menggunakan key trial, harus masuk melalui aplikasi dan klik tombol "Coba Gratis 3 Hari" di dalam aplikasi.');
+                return;
             }
-            return true;
-        };
-        
-        // ============================================
-        // RENDER HALAMAN UTAMA
-        // ============================================
-        function renderHomePage() {
-            return `
-                <div class="logo-container">
-                    <img src="logo.png" alt="PlutoXTeam Logo" class="logo" id="mainLogo" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block'">
-                    <div class="logo-fallback" id="logoFallback" style="display:none;">
-                        Pluto<span>XTeam</span>
-                    </div>
-                </div>
-                
-                <h2>Pilih Opsi Aktivasi</h2>
-                <div class="subtitle">Dapatkan akses premium ke PlutoXTeam</div>
-                
-                <div class="features">
-                    <div class="feature-item">
-                        <div class="feature-icon">✓</div>
-                        <div class="feature-text">
-                            <strong>Akses Penuh</strong>
-                            Semua fitur aplikasi
-                        </div>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon">⚡</div>
-                        <div class="feature-text">
-                            <strong>Tanpa Iklan</strong>
-                            Bebas gangguan iklan
-                        </div>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon">🔄</div>
-                        <div class="feature-text">
-                            <strong>Update Gratis</strong>
-                            Semua pembaruan terbaru
-                        </div>
-                    </div>
-                </div>
-                
-                <a href="${DOKU_LINK}" class="btn btn-buy" target="_blank">
-                    💳 Beli Key Premium (Rp 50.000)
-                </a>
-                
-                <!-- TOMBOL TRIAL DENGAN PENGECEKAN -->
-                <a href="#" id="trialBtn" class="btn btn-trial" onclick="event.preventDefault(); if(deviceId) { window.location.href='?device_id=' + deviceId; } else { alert('❌ Untuk mendapatkan key trial, Anda harus membukanya dari aplikasi dengan klik tombol \\'Buy Key\\'.'); }">
-                    🎁 Coba Gratis 3 Hari
-                </a>
-                
-                <a href="https://wa.me/${ADMIN_PHONE}?text=Halo%20admin%20PlutoXTeam%2C%20saya%20ingin%20bertanya" class="btn btn-admin" target="_blank">
-                    📞 Hubungi Admin (085849299253)
-                </a>
-                
-                <div class="footer">
-                    <strong>PlutoXTeam</strong> • Pilih sesuai kebutuhan
-                </div>
-            `;
+            
+            // Lanjut ke proses trial
+            prosesTrial(deviceId);
         }
         
-        // ============================================
-        // RENDER HALAMAN TRIAL (LOADING)
-        // ============================================
-        function renderTrialPage() {
-            return `
-                <div class="logo-container">
-                    <img src="logo.png" alt="PlutoXTeam Logo" class="logo" id="mainLogo" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block'">
-                    <div class="logo-fallback" id="logoFallback" style="display:none;">
-                        Pluto<span>XTeam</span>
+        /**
+         * Proses trial (cek history, tampilkan form)
+         */
+        async function prosesTrial(deviceId) {
+            const mainMenu = document.getElementById('mainMenu');
+            const trialArea = document.getElementById('trialArea');
+            
+            // Sembunyikan menu utama, tampilkan loading
+            mainMenu.classList.add('hidden');
+            trialArea.classList.remove('hidden');
+            trialArea.innerHTML = '<div style="text-align: center; padding: 20px;">⏳ Memeriksa status device...</div>';
+            
+            try {
+                // Cek apakah device sudah pernah trial
+                const snapshot = await firebase.database().ref('trial_history/' + deviceId).once('value');
+                
+                if (snapshot.exists()) {
+                    // Sudah pernah trial
+                    trialArea.innerHTML = `
+                        <div class="notification error" style="margin-top: 0;">
+                            <div class="notification-title">❌ Trial Gagal</div>
+                            <div class="notification-message">Device ini sudah pernah menggunakan trial sebelumnya.</div>
+                        </div>
+                        <a href="https://wa.me/${ADMIN_PHONE}?text=Halo%20admin%20PlutoXTeam%2C%20saya%20ingin%20bertanya" class="btn btn-admin" target="_blank">
+                            📞 Hubungi Admin
+                        </a>
+                        <button onclick="kembaliKeMenu()" class="btn" style="background: #6c757d;">⬅️ Kembali</button>
+                    `;
+                } else {
+                    // Belum pernah trial, tampilkan form
+                    trialArea.innerHTML = `
+                        <h2 style="margin-bottom: 20px;">Coba Gratis 3 Hari</h2>
+                        <div class="trial-form">
+                            <h3>📋 Isi Data Trial</h3>
+                            
+                            <div class="form-group">
+                                <label>Nama</label>
+                                <input type="text" id="trialName" placeholder="Masukkan nama lengkap">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Nomor WhatsApp</label>
+                                <input type="tel" id="trialPhone" placeholder="Contoh: 081234567890">
+                                <div class="form-hint">Gunakan nomor aktif untuk menerima key</div>
+                            </div>
+                            
+                            <button onclick="generateTrialKey('${deviceId}')" class="btn btn-trial" id="generateBtn">
+                                🔑 Generate Key Trial
+                            </button>
+                            
+                            <button onclick="kembaliKeMenu()" class="btn" style="background: #6c757d; margin-top: 10px;">
+                                ⬅️ Kembali
+                            </button>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                trialArea.innerHTML = `
+                    <div class="notification error">
+                        <div class="notification-title">❌ Error</div>
+                        <div class="notification-message">Terjadi kesalahan. Silakan coba lagi.</div>
                     </div>
-                </div>
-                
-                <h2>Coba Gratis 3 Hari</h2>
-                <div class="subtitle">Memeriksa riwayat device...</div>
-                
-                <div class="loading"></div>
-            `;
+                    <button onclick="kembaliKeMenu()" class="btn" style="background: #6c757d;">⬅️ Kembali</button>
+                `;
+            }
         }
         
-        // ============================================
-        // RENDER HALAMAN ERROR
-        // ============================================
-        function renderErrorPage(title, message, showBuy = true) {
-            return `
-                <div class="logo-container">
-                    <img src="logo.png" alt="PlutoXTeam Logo" class="logo" id="mainLogo" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block'">
-                    <div class="logo-fallback" id="logoFallback" style="display:none;">
-                        Pluto<span>XTeam</span>
-                    </div>
-                </div>
-                
-                <h2>${title}</h2>
-                <div class="error-box">
-                    <h3>❌ ${message}</h3>
-                    ${showBuy ? `<p>Silakan beli key premium untuk melanjutkan.</p>` : ''}
-                    ${showBuy ? `<a href="${DOKU_LINK}" class="btn btn-buy" target="_blank">💳 Beli Premium (Rp 50.000)</a>` : ''}
-                    <button onclick="kembali()" class="btn" style="background: #28a745;">
-                        ✅ Kembali ke Halaman Utama
-                    </button>
-                </div>
-                
-                <div class="footer">
-                    <strong>PlutoXTeam</strong> • Hubungi admin jika ada kendala
-                </div>
-            `;
-        }
-        
-        // ============================================
-        // RENDER FORM TRIAL
-        // ============================================
-        function renderTrialForm(deviceId) {
-            return `
-                <div class="logo-container">
-                    <img src="logo.png" alt="PlutoXTeam Logo" class="logo" id="mainLogo" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='block'">
-                    <div class="logo-fallback" id="logoFallback" style="display:none;">
-                        Pluto<span>XTeam</span>
-                    </div>
-                </div>
-                
-                <h2>Coba Gratis 3 Hari</h2>
-                <div class="subtitle">Isi data untuk mendapatkan key trial</div>
-                
-                <div class="features">
-                    <div class="feature-item">
-                        <div class="feature-icon">✓</div>
-                        <div class="feature-text">
-                            <strong>Akses Penuh</strong>
-                            Semua fitur aplikasi
-                        </div>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon">⚡</div>
-                        <div class="feature-text">
-                            <strong>Tanpa Iklan</strong>
-                            Bebas gangguan iklan
-                        </div>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon">🔄</div>
-                        <div class="feature-text">
-                            <strong>Update Gratis</strong>
-                            Semua pembaruan terbaru
-                        </div>
-                    </div>
-                </div>
-                
-                <a href="${DOKU_LINK}" class="btn btn-buy" target="_blank">
-                    💳 Beli Key Premium (Rp 50.000)
-                </a>
-                
-                <div id="trialForm" style="margin-top: 20px; text-align: left;">
-                    <div style="background: #f0f7ff; border-radius: 16px; padding: 20px; border: 1px solid #cce5ff;">
-                        <h3 style="color: #0056b3; margin-bottom: 15px; font-size: 18px;">📋 Isi Data Trial</h3>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 500;">Nama</label>
-                            <input type="text" id="trialName" placeholder="Masukkan nama" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
-                        </div>
-                        
-                        <div style="margin-bottom: 15px;">
-                            <label style="display: block; margin-bottom: 5px; color: #333; font-weight: 500;">Nomor WhatsApp</label>
-                            <input type="tel" id="trialPhone" placeholder="Contoh: 081234567890" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px;">
-                            <div style="font-size: 12px; color: #666; margin-top: 5px;">Gunakan kode negara 62</div>
-                        </div>
-                        
-                        <button onclick="generateTrialKey('${deviceId}')" style="background: #28a745; color: white; border: none; padding: 14px; border-radius: 30px; width: 100%; font-size: 16px; font-weight: 600; cursor: pointer;">
-                            🔑 Generate Key Trial
-                        </button>
-                    </div>
-                </div>
-                
-                <div id="trialResult" style="display: none; margin-top: 20px;"></div>
-                
-                <a href="https://wa.me/${ADMIN_PHONE}?text=Halo%20admin%20PlutoXTeam%2C%20saya%20ingin%20bertanya" class="btn btn-admin" target="_blank">
-                    📞 Hubungi Admin (085849299253)
-                </a>
-                
-                <div class="footer">
-                    <strong>PlutoXTeam</strong> • Trial hanya sekali per device
-                </div>
-            `;
-        }
-        
-        // ============================================
-        // GENERATE KEY TRIAL
-        // ============================================
+        /**
+         * Generate key trial
+         */
         window.generateTrialKey = async function(deviceId) {
-            const name = document.getElementById('trialName').value.trim();
-            let phone = document.getElementById('trialPhone').value.trim();
+            const name = document.getElementById('trialName')?.value.trim();
+            let phone = document.getElementById('trialPhone')?.value.trim();
             
             if (!name || !phone) {
-                alert('Nama dan nomor WhatsApp harus diisi!');
+                showNotification('warning', 'Data Tidak Lengkap', 'Nama dan nomor WhatsApp harus diisi!');
+                return;
+            }
+            
+            // Validasi nomor minimal 10 digit
+            if (phone.replace(/\D/g, '').length < 10) {
+                showNotification('warning', 'Nomor Tidak Valid', 'Nomor WhatsApp minimal 10 digit!');
                 return;
             }
             
             const formattedPhone = formatPhoneNumber(phone);
-            const btn = event.target;
+            const btn = document.getElementById('generateBtn');
             btn.disabled = true;
             btn.textContent = 'Memproses...';
             
-            // Generate key
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            // Generate key trial (format: TRIAL-XXXX-XXXX)
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let key = 'TRIAL-';
             for (let i = 0; i < 4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
             key += '-';
@@ -565,10 +532,23 @@
                     Value: '3d',
                     MaxDevices: 1,
                     ActivatedAt: Date.now(),
-                    Devices: null
+                    Devices: null,
+                    source: 'trial',
+                    deviceId: deviceId,
+                    name: name,
+                    phone: formattedPhone
                 });
                 
-                // Kirim via WHAPI
+                // Simpan ke trial_history
+                await firebase.database().ref('trial_history/' + deviceId).set({
+                    key: key,
+                    name: name,
+                    phone: formattedPhone,
+                    activatedAt: Date.now(),
+                    expiresAt: expireDate.getTime()
+                });
+                
+                // Kirim via WA
                 try {
                     await fetch('https://gate.whapi.cloud/messages/text', {
                         method: 'POST',
@@ -578,7 +558,29 @@
                         },
                         body: JSON.stringify({
                             to: formattedPhone,
-                            body: `🎁 *KEY TRIAL PLUTOXTEAM 3 HARI* 🎁\n\nHalo ${name}, selamat mencoba!\n\n*Key Trial Anda:* \`${key}\`\n*Berlaku hingga:* ${expireStr}\n\nGunakan key ini untuk aktivasi trial selama 3 hari.\n\nSetelah habis, Anda bisa membeli key premium untuk akses penuh.\n\nSalam,\nPlutoXTeam`
+                            body: `🎁 *KEY TRIAL PLUTOXTEAM 3 HARI* 🎁
+
+Halo ${name},
+
+Terima kasih telah mencoba PlutoXTeam.
+
+🔑 *KEY TRIAL ANDA*
+\`${key}\`
+
+📋 *DETAIL*
+• Masa berlaku: 3 hari
+• Berlaku hingga: ${expireStr}
+• Device ID: ${deviceId}
+
+📌 *CARA AKTIVASI*
+1. Buka aplikasi
+2. Masukkan key: ${key}
+3. Klik tombol Login
+4. Nikmati trial selama 3 hari
+
+Setelah habis, Anda bisa membeli key premium untuk akses penuh.
+
+*PlutoXTeam* 🚀`
                         })
                     });
                 } catch (waError) {
@@ -586,85 +588,88 @@
                 }
                 
                 // Tampilkan hasil
-                document.getElementById('trialForm').style.display = 'none';
-                document.getElementById('trialResult').style.display = 'block';
-                document.getElementById('trialResult').innerHTML = `
+                document.getElementById('trialArea').innerHTML = `
                     <div class="success-box">
-                        <h3>✅ Key Trial Berhasil!</h3>
-                        <div style="background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
-                            <div>Nama: ${name}</div>
-                            <div>WA: ${formattedPhone}</div>
-                            <div>Berlaku hingga: ${expireStr}</div>
+                        <h3 style="color: #155724; margin-bottom: 15px;">✅ Key Trial Berhasil!</h3>
+                        
+                        <div style="background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; text-align: left;">
+                            <div><strong>Nama:</strong> ${name}</div>
+                            <div><strong>WA:</strong> ${formattedPhone}</div>
+                            <div><strong>Berlaku hingga:</strong> ${expireStr}</div>
+                            <div><strong>Device ID:</strong> ${deviceId}</div>
                         </div>
                         
                         <div class="key-display">${key}</div>
                         
                         <button onclick="copyKey('${key}')" class="btn btn-copy">📋 Copy Key</button>
-                        <p style="margin: 15px 0;">Key telah dikirim ke WhatsApp Anda.</p>
                         
-                        <a href="${DOKU_LINK}" class="btn btn-buy" target="_blank">💳 Beli Premium (Rp 50.000)</a>
-                        <button onclick="kembali()" class="btn" style="background: #28a745;">✅ Kembali</button>
+                        <p style="margin: 15px 0; color: #155724;">Key telah dikirim ke WhatsApp Anda.</p>
+                        
+                        <a href="${DOKU_LINK}" class="btn btn-premium" target="_blank">💳 Beli Premium (Rp 50.000)</a>
+                        
+                        <button onclick="kembaliKeMenu()" class="btn" style="background: #28a745; margin-top: 10px;">
+                            ✅ Selesai
+                        </button>
                     </div>
                 `;
                 
-                btn.disabled = false;
-                
             } catch (error) {
                 console.error('Error:', error);
-                alert('Gagal menyimpan key. Silakan coba lagi.');
+                showNotification('error', 'Gagal', 'Gagal menyimpan key. Silakan coba lagi.');
                 btn.disabled = false;
                 btn.textContent = '🔑 Generate Key Trial';
             }
         };
         
-        // Handle logo error
-        window.handleLogoError = function() {
-            const logo = document.getElementById('mainLogo');
-            const fallback = document.getElementById('logoFallback');
-            if (logo) logo.style.display = 'none';
-            if (fallback) fallback.style.display = 'block';
+        /**
+         * Copy key ke clipboard
+         */
+        window.copyKey = function(key) {
+            navigator.clipboard.writeText(key).then(() => {
+                const notif = document.getElementById('notificationArea');
+                notif.innerHTML = `
+                    <div class="notification success">
+                        <div class="notification-title">✅ Berhasil</div>
+                        <div class="notification-message">Key berhasil disalin!</div>
+                    </div>
+                `;
+                setTimeout(() => {
+                    notif.innerHTML = '';
+                }, 3000);
+            });
         };
         
-        // ============================================
-        // LOGIKA UTAMA
-        // ============================================
-        async function init() {
-            const container = document.getElementById('mainContainer');
-            
-            // Jika tidak ada device ID, tampilkan halaman utama
-            if (!deviceId) {
-                container.innerHTML = renderHomePage();
-                return;
-            }
-            
-            // Ada device ID, tampilkan loading
-            container.innerHTML = renderTrialPage();
-            
-            try {
-                // Cek trial_history
-                const snapshot = await firebase.database().ref('trial_history/' + deviceId).once('value');
-                
-                if (snapshot.exists()) {
-                    container.innerHTML = renderErrorPage(
-                        'Trial Gagal',
-                        'Device ini sudah pernah menggunakan trial sebelumnya.',
-                        true
-                    );
-                } else {
-                    container.innerHTML = renderTrialForm(deviceId);
-                }
-            } catch (error) {
-                console.error('Firebase error:', error);
-                container.innerHTML = renderErrorPage(
-                    'Error',
-                    'Terjadi kesalahan. Silakan coba lagi.',
-                    true
-                );
-            }
-        }
+        /**
+         * Kembali ke menu utama
+         */
+        window.kembaliKeMenu = function() {
+            document.getElementById('mainMenu').classList.remove('hidden');
+            document.getElementById('trialArea').classList.add('hidden');
+            document.getElementById('trialArea').innerHTML = '';
+            document.getElementById('notificationArea').innerHTML = '';
+        };
         
-        // Jalankan
-        init();
+        /**
+         * Handle logo error
+         */
+        window.handleLogoError = function() {
+            document.getElementById('mainLogo').style.display = 'none';
+            document.getElementById('logoFallback').style.display = 'block';
+        };
+        
+        /**
+         * Cek parameter di URL saat halaman dimuat
+         */
+        (function checkUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            const deviceId = params.get('device_id');
+            
+            // Jika ada device_id, tampilkan notifikasi (tapi jangan langsung proses)
+            if (deviceId) {
+                showNotification('info', 'Device ID Terdeteksi', 
+                    'Klik tombol "Coba Gratis 3 Hari" untuk memulai trial dengan device ini.');
+            }
+        })();
     </script>
 </body>
 </html>
