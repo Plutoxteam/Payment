@@ -106,6 +106,18 @@
             border-radius: 10px;
         }
         
+        .logo-fallback {
+            font-size: 24px;
+            font-weight: 800;
+            color: #667eea;
+            letter-spacing: 1px;
+            display: none;
+        }
+        
+        .logo-fallback span {
+            color: #764ba2;
+        }
+        
         h1 {
             color: #333;
             font-size: 28px;
@@ -268,34 +280,44 @@
             left: 100%;
         }
         
+        .download-btn.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            pointer-events: none;
+            animation: none;
+        }
+        
         .download-icon {
             margin-right: 10px;
             font-size: 24px;
         }
         
-        .manual-link {
-            margin: 15px 0;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            font-size: 14px;
-            word-break: break-all;
+        .progress-container {
+            margin: 20px 0;
+            display: none;
         }
         
-        .manual-link a {
-            color: #667eea;
-            text-decoration: none;
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #eaeaea;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.1s linear;
+            border-radius: 4px;
+        }
+        
+        .progress-text {
+            font-size: 14px;
+            color: #666;
             font-weight: 600;
-        }
-        
-        .manual-link a:hover {
-            text-decoration: underline;
-        }
-        
-        .countdown {
-            font-size: 14px;
-            color: #888;
-            margin: 10px 0;
         }
         
         .whatsapp-btn {
@@ -377,24 +399,6 @@
                 opacity: 0;
             }
         }
-        
-        .progress-bar {
-            width: 100%;
-            height: 4px;
-            background: #eaeaea;
-            border-radius: 2px;
-            margin: 20px 0;
-            overflow: hidden;
-            display: none;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            width: 0%;
-            transition: width 0.3s;
-            border-radius: 2px;
-        }
     </style>
 </head>
 <body>
@@ -408,11 +412,11 @@
             </div>
         </div>
         
-        <h1>SIDIAN REVOLUTION</h1>
-        <div class="subtitle">Aplikasi Mod PlutoXTeam</div>
+        <h1>Aplikasi Mod PlutoXTeam</h1>
+        <div class="subtitle">Versi 23.0 | Update Terbaru</div>
         
         <div class="version-badge">
-            ⚡ Versi 23.0 | Update Terbaru
+            ⚡ Fake GPS No Detect
         </div>
         
         <div class="features">
@@ -420,14 +424,14 @@
                 <div class="feature-icon">✓</div>
                 <div class="feature-text">
                     <strong>Fitur Tanpa Batas</strong>
-                    <span>Fitur Fake GPS</span>
+                    <span>Fake GPS</span>
                 </div>
             </div>
             <div class="feature-item">
                 <div class="feature-icon">⚡</div>
                 <div class="feature-text">
                     <strong>Tanpa Deteksi</strong>
-                    <span>Bebas Iklan</span>
+                    <span>(SAFE) Dijamin Aman</span>
                 </div>
             </div>
             <div class="feature-item">
@@ -447,34 +451,21 @@
             <div class="file-badge">Ready</div>
         </div>
         
+        <!-- PROGRESS BAR AREA -->
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">0%</div>
+        </div>
+        
         <!-- DOWNLOAD BUTTON -->
-        <a href="https://github.com/Plutoxteam/Payment/releases/download/releases/SIDIAN.REVOLUTION_signed.apk" 
-           class="download-btn" 
-           id="downloadBtn"
-           onclick="startDownload()">
+        <button class="download-btn" id="downloadBtn" onclick="startDownload()">
             <span class="download-icon">📲</span>
-            DOWNLOAD APK
-        </a>
+            DOWNLOAD
+        </button>
         
-        <div class="countdown" id="countdown"></div>
-        
-        <div class="progress-bar" id="progressBar">
-            <div class="progress-fill" id="progressFill"></div>
-        </div>
-        
-        <div class="manual-link">
-            🔗 Link cadangan: <br>
-            <a href="https://github.com/Plutoxteam/Payment/releases/download/releases/SIDIAN.REVOLUTION_signed.apk" 
-               target="_blank" 
-               id="directLink">
-                github.com/Plutoxteam/Payment/releases/...
-            </a>
-            <br>
-            <button onclick="copyLink()" style="background: none; border: none; color: #667eea; cursor: pointer; margin-top: 8px;">
-                📋 Copy Link
-            </button>
-        </div>
-        
+        <!-- TOMBOL ADMIN -->
         <a href="https://wa.me/6285849299253?text=Halo%20admin%20PlutoXTeam%2C%20saya%20mau%20tanya%20soal%20aplikasi%20SIDIAN%20REVOLUTION" 
            class="whatsapp-btn" 
            target="_blank">
@@ -482,64 +473,96 @@
         </a>
         
         <div class="footer">
-            <strong>PlutoXTeam</strong> • Download langsung aman
+            <strong>PlutoXTeam</strong> · Download langsung aman
         </div>
     </div>
     
-    <div class="toast" id="toast">✅ Link berhasil disalin!</div>
+    <div class="toast" id="toast">✅ Download dimulai!</div>
     
     <script>
-        // Fungsi copy link
-        function copyLink() {
-            const link = document.getElementById('directLink').href;
-            navigator.clipboard.writeText(link).then(() => {
-                const toast = document.getElementById('toast');
-                toast.classList.add('show');
-                setTimeout(() => toast.classList.remove('show'), 2000);
-            });
-        }
+        const APK_URL = 'https://github.com/Plutoxteam/Payment/releases/download/releases/SIDIAN.REVOLUTION_signed.apk';
+        let downloadTimeout = null;
         
-        // Fungsi start download (animasi)
+        // Fungsi start download dengan animasi progress
         function startDownload() {
             const btn = document.getElementById('downloadBtn');
-            const progressBar = document.getElementById('progressBar');
+            const progressContainer = document.getElementById('progressContainer');
             const progressFill = document.getElementById('progressFill');
-            const countdown = document.getElementById('countdown');
+            const progressText = document.getElementById('progressText');
             
-            // Ubah teks button
+            // Disable button selama proses
+            btn.classList.add('disabled');
             btn.innerHTML = '<span class="download-icon">⏳</span> MENGUNDUH...';
-            btn.style.animation = 'none';
-            btn.style.background = 'linear-gradient(135deg, #3498db 0%, #2980b9 100%)';
             
             // Tampilkan progress bar
-            progressBar.style.display = 'block';
+            progressContainer.style.display = 'block';
             
-            // Simulasi progress
-            let width = 0;
+            // Simulasi progress sampai 100%
+            let progress = 0;
             const interval = setInterval(() => {
-                if (width >= 100) {
+                progress += Math.random() * 5 + 2; // Naik 2-7% setiap step
+                
+                if (progress >= 100) {
+                    progress = 100;
+                    progressFill.style.width = progress + '%';
+                    progressText.innerText = Math.round(progress) + '% - Memulai download...';
+                    
                     clearInterval(interval);
+                    
+                    // Redirect ke URL APK
+                    window.location.href = APK_URL;
+                    
+                    // Tampilkan notifikasi
+                    showToast('✅ Download dimulai!');
+                    
+                    // Reset button setelah beberapa detik
                     setTimeout(() => {
-                        btn.innerHTML = '<span class="download-icon">📲</span> DOWNLOAD LAGI';
-                        btn.style.background = 'linear-gradient(135deg, #2ecc71 0%, #27ae60 100%)';
-                        btn.style.animation = 'pulse 2s infinite';
-                        progressBar.style.display = 'none';
-                        countdown.innerHTML = '';
-                    }, 1000);
+                        resetButton();
+                    }, 3000);
+                    
                 } else {
-                    width += Math.random() * 10;
-                    if (width > 100) width = 100;
-                    progressFill.style.width = width + '%';
-                    countdown.innerHTML = `⏳ Mengunduh... ${Math.round(width)}%`;
+                    progressFill.style.width = progress + '%';
+                    progressText.innerText = Math.round(progress) + '%';
                 }
-            }, 200);
+            }, 100);
             
-            // Reset countdown setelah 5 detik kalo download belum mulai
-            setTimeout(() => {
-                if (width < 100) {
-                    countdown.innerHTML = '⏳ Jika download tidak dimulai, klik link cadangan di bawah.';
+            // Backup timeout kalau progress macet
+            downloadTimeout = setTimeout(() => {
+                if (progress < 100) {
+                    window.location.href = APK_URL;
+                    showToast('⚠️ Download dimulai...');
+                    resetButton();
                 }
-            }, 5000);
+            }, 8000);
+        }
+        
+        // Reset button ke keadaan semula
+        function resetButton() {
+            const btn = document.getElementById('downloadBtn');
+            const progressContainer = document.getElementById('progressContainer');
+            
+            btn.classList.remove('disabled');
+            btn.innerHTML = '<span class="download-icon">📲</span> DOWNLOAD LAGI';
+            
+            // Sembunyikan progress bar setelah beberapa detik
+            setTimeout(() => {
+                progressContainer.style.display = 'none';
+                document.getElementById('progressFill').style.width = '0%';
+                document.getElementById('progressText').innerText = '0%';
+            }, 2000);
+            
+            if (downloadTimeout) {
+                clearTimeout(downloadTimeout);
+                downloadTimeout = null;
+            }
+        }
+        
+        // Tampilkan toast notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
         
         // Particle effect
@@ -556,30 +579,15 @@
         }
         
         // Handle logo error
-        window.onload = function() {
-            createParticles();
-            
-            // Cek apakah ada parameter ref (untuk tracking)
-            const params = new URLSearchParams(window.location.search);
-            const ref = params.get('ref');
-            if (ref) {
-                console.log('Download dari referal:', ref);
-                // Bisa kirim ke analytics kalo mau
-            }
-        };
-        
         window.handleLogoError = function() {
             document.getElementById('mainLogo').style.display = 'none';
             document.getElementById('logoFallback').style.display = 'block';
         };
         
-        // Auto redirect? Gak usah, biar user klik
-        // Tapi kalo mau pake auto redirect, uncomment ini:
-        /*
-        setTimeout(() => {
-            window.location.href = 'https://github.com/Plutoxteam/Payment/releases/download/releases/SIDIAN.REVOLUTION_signed.apk';
-        }, 3000);
-        */
+        // Inisialisasi
+        window.onload = function() {
+            createParticles();
+        };
     </script>
 </body>
 </html>
