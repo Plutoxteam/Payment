@@ -8,7 +8,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        /* CSS SAMA PERSIS DENGAN KODE LO */
         * {
             margin: 0;
             padding: 0;
@@ -367,12 +366,12 @@
             </a>
         </div>
 
-        <!-- AREA PENDING/MENUNGGU (KEMBALI KE MERCHANT TANPA BAYAR) -->
+        <!-- AREA PENDING/MENUNGGU - SUDAH DIPERBAIKI -->
         <div id="pendingArea" class="warning-box">
             <h3>⏳ Menunggu Pembayaran</h3>
             <p>Anda kembali ke merchant sebelum menyelesaikan pembayaran.</p>
             <p>Silakan selesaikan pembayaran Anda di halaman DOKU.</p>
-            <p style="margin-top: 15px; font-size: 13px;" id="pendingInfo"></p>
+            <p style="margin-top: 15px; font-size: 13px;">Jika sudah membayar, tunggu beberapa saat hingga notifikasi masuk.</p>
             <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-payment" style="margin-top: 15px;">
                 💳 Kembali ke Halaman Pembayaran
             </a>
@@ -605,7 +604,7 @@ Salam hangat,
             document.getElementById('logoFallback').style.display = 'block';
         };
         
-        // ================== MAIN FUNCTION ==================
+        // ================== MAIN FUNCTION (FIXED - TANPA INVOICE DI PENDING) ==================
         
         window.onload = async function() {
             try {
@@ -616,41 +615,39 @@ Salam hangat,
                 // ========== AMBIL DARI URL (kalo ada) ==========
                 const urlParams = new URLSearchParams(window.location.search);
                 
-                // Invoice dari URL
+                // Invoice dari URL (kalo ada)
                 const urlInvoice = urlParams.get('invoice') || 
                                   urlParams.get('reference_id') || 
                                   urlParams.get('order_number') || 
                                   '';
                 
-                // Status dari URL (payment_status=1)
+                // Status dari URL
                 const paymentStatus = urlParams.get('payment_status') || '0';
                 
                 // ========== GABUNGKAN DATA ==========
-                const invoice = urlInvoice || sessionInvoice || 'INV-' + Date.now();
-                const phone = sessionPhone; // NOMOR WA DARI SESSION STORAGE!
-                const isSuccess = paymentStatus === '1'; // CEK STATUS 1
+                const invoice = urlInvoice || sessionInvoice; // JANGAN GENERATE SENDIRI
+                const phone = sessionPhone;
                 
-                console.log('📦 DATA FINAL:', { 
+                // DETEKSI SUKSES: ADA PARAMETER DI URL ATAU PAYMENT_STATUS=1
+                const hasParams = urlParams.toString() !== '';
+                const isSuccess = hasParams || paymentStatus === '1';
+                
+                console.log('📦 DATA:', { 
                     invoice, 
                     phone, 
-                    paymentStatus, 
-                    isSuccess,
-                    sessionPhone,
-                    sessionInvoice,
-                    urlInvoice
+                    hasParams,
+                    paymentStatus,
+                    isSuccess
                 });
                 
-                // ========== PENGAMAN: CEK STATUS ==========
+                // ========== PENGAMAN ==========
                 if (!isSuccess) {
-                    // Tampilkan area pending
+                    // Tampilkan area pending (TANPA INVOICE)
                     document.getElementById('pendingArea').style.display = 'block';
                     document.getElementById('successArea').classList.add('hidden');
                     
-                    // Update info di pending
-                    document.getElementById('pendingInfo').innerHTML = `
-                        <strong>Invoice:</strong> ${invoice}<br>
-                        <strong>Status:</strong> ${paymentStatus === '1' ? 'SUKSES' : 'MENUNGGU'} (payment_status: ${paymentStatus})
-                    `;
+                    // Gak usah tampilin invoice apa pun
+                    // Cuma teks "Menunggu Pembayaran" doang
                     return;
                 }
                 
@@ -662,7 +659,7 @@ Salam hangat,
                 // Update tampilan
                 document.getElementById('amount').textContent = formatRupiah(AMOUNT_FIXED);
                 document.getElementById('time').textContent = getCurrentTime();
-                document.getElementById('invoiceDisplay').textContent = invoice;
+                document.getElementById('invoiceDisplay').textContent = invoice || 'Tidak ada';
                 
                 const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
                 const localPhone = formatPhoneLocal(cleanPhone);
@@ -679,11 +676,13 @@ Salam hangat,
                 document.getElementById('keyDisplay').textContent = fullKey;
                 
                 // Simpan key ke Firebase
-                await saveKeyToFirebase(fullKey, invoice, cleanPhone);
+                if (invoice) {
+                    await saveKeyToFirebase(fullKey, invoice, cleanPhone);
+                }
                 
                 // Kirim WA jika nomor tersedia
                 if (cleanPhone && cleanPhone.length >= 10) {
-                    await sendViaWhapi(cleanPhone, fullKey, invoice);
+                    await sendViaWhapi(cleanPhone, fullKey, invoice || 'INV-' + Date.now());
                 } else {
                     document.getElementById('waStatus').className = 'status-message status-warning';
                     document.getElementById('waStatus').innerHTML = '⚠️ Nomor WA tidak tersedia. Key dapat disalin manual.';
@@ -699,11 +698,6 @@ Salam hangat,
                 // Tampilkan error di area pending
                 document.getElementById('pendingArea').style.display = 'block';
                 document.getElementById('successArea').classList.add('hidden');
-                
-                document.getElementById('pendingInfo').innerHTML = `
-                    <strong>Error:</strong> ${error.message}<br>
-                    Silakan hubungi admin.
-                `;
             }
         };
     </script>
