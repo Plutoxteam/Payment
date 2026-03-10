@@ -393,15 +393,63 @@
             return cleaned;
         }
         
-        // ================== FUNGSI KEY ==================
+        // ================== FUNGSI KEY ANTI DUPLIKAT ==================
         
-        function generateKey() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let key = '';
-            for (let i = 0; i < 8; i++) {
-                key += chars.charAt(Math.floor(Math.random() * chars.length));
+        /**
+         * Generate 6 karakter random (hanya huruf kapital, tanpa I/O)
+         */
+        function generateRandomPart() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // 24 huruf
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-            return key; // 8 karakter, tanpa prefix
+            return result;
+        }
+        
+        /**
+         * Generate key lengkap dengan prefix VIP-
+         */
+        function generateKey() {
+            return 'VIP-' + generateRandomPart(); // Contoh: VIP-ABCDEF
+        }
+        
+        /**
+         * Cek apakah key sudah ada di Firebase
+         */
+        async function isKeyExists(key) {
+            try {
+                const snapshot = await firebase.database().ref('Keys/' + key).once('value');
+                return snapshot.exists();
+            } catch (error) {
+                console.error('❌ Error cek key:', error);
+                return true; // Kalau error, anggap exist biar aman
+            }
+        }
+        
+        /**
+         * Generate key UNIK (dijamin belum dipakai)
+         */
+        async function generateUniqueKey() {
+            let attempts = 0;
+            const maxAttempts = 10;
+            
+            while (attempts < maxAttempts) {
+                const key = generateKey();
+                const exists = await isKeyExists(key);
+                
+                if (!exists) {
+                    console.log(`✅ Key unik: ${key} (${attempts + 1} percobaan)`);
+                    return key;
+                }
+                
+                attempts++;
+                console.log(`🔄 Key ${key} sudah ada, generate ulang...`);
+            }
+            
+            // Fallback kalo mentok
+            console.warn('⚠️ Fallback: pake timestamp');
+            return 'VIP-' + Date.now().toString(36).toUpperCase().substring(0, 6);
         }
         
         window.copyKey = function() {
@@ -419,7 +467,6 @@
         
         async function saveKeyToFirebase(key, invoice, phone) {
             try {
-                // Simpan ke Keys/[key] dengan struktur yang benar
                 await firebase.database().ref('Keys/' + key).set({
                     ActivatedAt: 0,
                     Devices: "null",
@@ -430,7 +477,7 @@
                 
                 console.log('✅ Key tersimpan di Keys/' + key);
                 
-                // Update transaksi dengan info key (opsional)
+                // Update transaksi (opsional)
                 await firebase.database().ref('transactions/' + invoice).update({
                     generatedKey: key,
                     keySentTo: phone
@@ -445,7 +492,7 @@
         
         // ================== FUNGSI WHATSAPP ==================
         
-        async function sendViaWhapi(phone, fullKey, invoice, amount) {
+        async function sendViaWhapi(phone, key, invoice, amount) {
             const statusDiv = document.getElementById('waStatus');
             statusDiv.style.display = 'block';
             statusDiv.innerHTML = '📤 Mengirimkan key VIP via WhatsApp...';
@@ -478,7 +525,7 @@ Terima kasih telah melakukan pembayaran. Berikut adalah detail transaksi dan key
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 🔑 *KEY VIP ANDA*
-\`${fullKey}\`
+\`${key}\`
 
 📋 *DETAIL TRANSAKSI*
 • Invoice     : ${invoice}
@@ -488,7 +535,7 @@ Terima kasih telah melakukan pembayaran. Berikut adalah detail transaksi dan key
 
 📌 *CARA AKTIVASI*
 1. Buka aplikasi PlutoXTeam
-2. Masukkan key: ${fullKey}
+2. Masukkan key: ${key}
 3. Klik tombol Aktivasi
 4. Nikmati layanan premium
 
@@ -513,6 +560,7 @@ Salam hangat,
                 }
                 
             } catch (error) {
+                console.error('WA Error:', error);
                 statusDiv.className = 'status-message status-error';
                 statusDiv.innerHTML = '❌ Gagal mengirim ke WhatsApp. Key dapat disalin manual.';
                 return false;
@@ -530,7 +578,7 @@ Salam hangat,
             document.getElementById('logoFallback').style.display = 'block';
         };
         
-        // ================== MAIN ==================
+        // ================== MAIN FUNCTION ==================
         
         window.onload = async function() {
             try {
@@ -566,16 +614,14 @@ Salam hangat,
                 document.getElementById('phoneDisplay').textContent = localPhone;
                 document.getElementById('phoneLink').textContent = localPhone;
                 
-                // Generate key
-                const rawKey = generateKey();                 // "WBHLBWZ2"
-                const fullKey = 'Key_VIP-' + rawKey;          // "Key_VIP-WBHLBWZ2"
-                
+                // ===== GENERATE KEY UNIK =====
+                const fullKey = await generateUniqueKey(); // "VIP-ABCDEF"
                 document.getElementById('keyDisplay').textContent = fullKey;
                 
-                // Simpan key ke Firebase (rawKey)
-                await saveKeyToFirebase(rawKey, latestInvoice, cleanPhone);
+                // Simpan ke Firebase
+                await saveKeyToFirebase(fullKey, latestInvoice, cleanPhone);
                 
-                // Kirim WA (fullKey)
+                // Kirim WA
                 if (cleanPhone && cleanPhone.length >= 10) {
                     await sendViaWhapi(cleanPhone, fullKey, latestInvoice, transaction.amount || 50000);
                 } else {
@@ -584,7 +630,7 @@ Salam hangat,
                 }
                 
             } catch (error) {
-                console.error(error);
+                console.error('❌ ERROR:', error);
                 document.getElementById('waStatus').className = 'status-message status-error';
                 document.getElementById('waStatus').innerHTML = '❌ Gagal memuat data. Hubungi admin.';
                 document.getElementById('keyDisplay').textContent = 'Gagal memuat key';
