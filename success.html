@@ -280,10 +280,7 @@
         <h1>Pembayaran Berhasil! ✅</h1>
         
         <div class="info-card" id="transactionInfo">
-            <div class="info-row">
-                <span class="info-label">Invoice</span>
-                <span class="info-value" id="invoice">Memproses...</span>
-            </div>
+            <!-- BARIS INVOICE TELAH DIHAPUS -->
             <div class="info-row">
                 <span class="info-label">Total</span>
                 <span class="info-value" id="amount">Memproses...</span>
@@ -395,11 +392,8 @@
         
         // ================== FUNGSI KEY ANTI DUPLIKAT ==================
         
-        /**
-         * Generate 6 karakter random (hanya huruf kapital, tanpa I/O)
-         */
         function generateRandomPart() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // 24 huruf
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
             let result = '';
             for (let i = 0; i < 6; i++) {
                 result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -407,29 +401,20 @@
             return result;
         }
         
-        /**
-         * Generate key lengkap dengan prefix VIP-
-         */
         function generateKey() {
-            return 'VIP-' + generateRandomPart(); // Contoh: VIP-ABCDEF
+            return 'VIP-' + generateRandomPart();
         }
         
-        /**
-         * Cek apakah key sudah ada di Firebase
-         */
         async function isKeyExists(key) {
             try {
                 const snapshot = await firebase.database().ref('Keys/' + key).once('value');
                 return snapshot.exists();
             } catch (error) {
                 console.error('❌ Error cek key:', error);
-                return true; // Kalau error, anggap exist biar aman
+                return true;
             }
         }
         
-        /**
-         * Generate key UNIK (dijamin belum dipakai)
-         */
         async function generateUniqueKey() {
             let attempts = 0;
             const maxAttempts = 10;
@@ -447,7 +432,6 @@
                 console.log(`🔄 Key ${key} sudah ada, generate ulang...`);
             }
             
-            // Fallback kalo mentok
             console.warn('⚠️ Fallback: pake timestamp');
             return 'VIP-' + Date.now().toString(36).toUpperCase().substring(0, 6);
         }
@@ -527,10 +511,9 @@ Terima kasih telah melakukan pembayaran. Berikut adalah detail transaksi dan key
 \`${key}\`
 
 📋 *DETAIL TRANSAKSI*
-• Invoice     : ${invoice}
-• Total       : ${formattedAmount}
-• Waktu       : ${currentTime}
-• Masa Berlaku: 30 hari (hingga ${expireDate})
+• Total          : ${formattedAmount}
+• Waktu         : ${currentTime}
+• Masa Berlaku : 30 hari (hingga ${expireDate})
 
 📌 *CARA AKTIVASI*
 1. Buka aplikasi
@@ -603,8 +586,7 @@ Salam hangat,
                 const phone = transaction.phone || '';
                 const cleanPhone = phone.replace(/\D/g, '');
                 
-                // Update tampilan
-                document.getElementById('invoice').textContent = latestInvoice;
+                // Update tampilan (INVOICE TIDAK DITAMPILKAN LAGI)
                 document.getElementById('amount').textContent = formatRupiah(transaction.amount || 50000);
                 document.getElementById('time').textContent = getCurrentTime();
                 
@@ -613,7 +595,7 @@ Salam hangat,
                 document.getElementById('phoneLink').textContent = localPhone;
                 
                 // ===== GENERATE KEY UNIK =====
-                const fullKey = await generateUniqueKey(); // "VIP-ABCDEF"
+                const fullKey = await generateUniqueKey();
                 document.getElementById('keyDisplay').textContent = fullKey;
                 
                 // Simpan ke Firebase
