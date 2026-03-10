@@ -242,7 +242,7 @@
             background: #667eea;
             margin-top: 15px;
         }
-        
+
         .btn-payment {
             background: #f0933b;
         }
@@ -372,7 +372,7 @@
             <h3>⏳ Menunggu Pembayaran</h3>
             <p>Anda kembali ke merchant sebelum menyelesaikan pembayaran.</p>
             <p>Silakan selesaikan pembayaran Anda di halaman DOKU.</p>
-            <p style="margin-top: 15px; font-size: 13px;">Jika sudah membayar, tunggu beberapa saat hingga notifikasi masuk.</p>
+            <p style="margin-top: 15px; font-size: 13px;" id="pendingInfo"></p>
             <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-payment" style="margin-top: 15px;">
                 💳 Kembali ke Halaman Pembayaran
             </a>
@@ -560,7 +560,6 @@ Terima kasih telah melakukan pembayaran. Berikut adalah detail transaksi dan key
 • Total       : ${formattedAmount}
 • Waktu       : ${currentTime}
 • Masa Berlaku: 30 hari (hingga ${expireDate})
-• Invoice     : ${invoice}
 
 📌 *CARA AKTIVASI*
 1. Buka aplikasi
@@ -606,94 +605,66 @@ Salam hangat,
             document.getElementById('logoFallback').style.display = 'block';
         };
         
-        // ================== MAIN FUNCTION (FIXED - PAKE KODE 1) ==================
+        // ================== MAIN FUNCTION ==================
         
         window.onload = async function() {
             try {
-                // Ambil parameter dari URL
+                // ========== AMBIL DATA DARI SESSION STORAGE ==========
+                const sessionPhone = sessionStorage.getItem('customer_phone') || '';
+                const sessionInvoice = sessionStorage.getItem('customer_invoice') || '';
+                
+                // ========== AMBIL DARI URL (kalo ada) ==========
                 const urlParams = new URLSearchParams(window.location.search);
                 
-                // TAMPILKAN SEMUA PARAMETER BUAT DEBUG
-                console.log('🔍 SEMUA PARAMETER URL:');
-                urlParams.forEach((value, key) => {
-                    console.log(`${key}: ${value}`);
-                });
-                
-                // AMBIL DATA DENGAN SEGALA KEMUNGKINAN NAMA PARAMETER
-                const invoice = urlParams.get('invoice') || 
-                               urlParams.get('INVOICE') || 
-                               urlParams.get('order_number') ||
-                               urlParams.get('reference_id') ||
-                               urlParams.get('payment_refence_id') ||
-                               '';
-                
-                // AMBIL STATUS DARI BEBERAPA KEMUNGKINAN
-                const statusText = urlParams.get('status') || 
-                                  urlParams.get('STATUS') || 
-                                  urlParams.get('result') || 
+                // Invoice dari URL
+                const urlInvoice = urlParams.get('invoice') || 
+                                  urlParams.get('reference_id') || 
+                                  urlParams.get('order_number') || 
                                   '';
                 
-                // AMBIL PAYMENT_STATUS (YANG NILAINYA 1)
-                const paymentStatus = urlParams.get('payment_status') || 
-                                     urlParams.get('PAYMENT_STATUS') || 
-                                     '';
+                // Status dari URL (payment_status=1)
+                const paymentStatus = urlParams.get('payment_status') || '0';
                 
-                // AMBIL NOMOR TELEPON
-                const phone = urlParams.get('phone') || 
-                             urlParams.get('PHONE') || 
-                             urlParams.get('customer_phone') || 
-                             urlParams.get('customField2') ||
-                             '';
+                // ========== GABUNGKAN DATA ==========
+                const invoice = urlInvoice || sessionInvoice || 'INV-' + Date.now();
+                const phone = sessionPhone; // NOMOR WA DARI SESSION STORAGE!
+                const isSuccess = paymentStatus === '1'; // CEK STATUS 1
                 
-                console.log('📱 DATA DIDAPAT:', { 
+                console.log('📦 DATA FINAL:', { 
                     invoice, 
-                    statusText, 
+                    phone, 
                     paymentStatus, 
-                    phone 
+                    isSuccess,
+                    sessionPhone,
+                    sessionInvoice,
+                    urlInvoice
                 });
                 
-                // CEK APAKAH SUKSES BERDASARKAN KODE 1 (payment_status=1)
-                // ATAU STATUS TEXT = SUCCESS
-                const isSuccess = paymentStatus === '1' || 
-                                 paymentStatus === 1 ||
-                                 statusText.toUpperCase() === 'SUCCESS' ||
-                                 statusText.toLowerCase() === 'success';
-                
-                // CEK APAKAH INI DARI KEMBALI KE MERCHANT ATAU SUKSES?
-                if (!invoice || !isSuccess) {
+                // ========== PENGAMAN: CEK STATUS ==========
+                if (!isSuccess) {
                     // Tampilkan area pending
                     document.getElementById('pendingArea').style.display = 'block';
                     document.getElementById('successArea').classList.add('hidden');
                     
-                    // Update tampilan pending dengan data yang ada
-                    document.getElementById('pendingArea').innerHTML = `
-                        <h3>⏳ Menunggu Pembayaran</h3>
-                        <p>Anda kembali ke merchant sebelum menyelesaikan pembayaran.</p>
-                        <p style="margin-top: 10px;"><strong>Invoice:</strong> ${invoice || 'Tidak ada'}</p>
-                        <p><strong>Status:</strong> ${statusText || 'PENDING'} (payment_status: ${paymentStatus || '-'})</p>
-                        <p>Silakan selesaikan pembayaran Anda di halaman DOKU.</p>
-                        <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-payment" style="margin-top: 15px;">
-                            💳 Kembali ke Halaman Pembayaran
-                        </a>
-                        <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 10px;">
-                            🏠 Kembali ke Menu Utama
-                        </a>
+                    // Update info di pending
+                    document.getElementById('pendingInfo').innerHTML = `
+                        <strong>Invoice:</strong> ${invoice}<br>
+                        <strong>Status:</strong> ${paymentStatus === '1' ? 'SUKSES' : 'MENUNGGU'} (payment_status: ${paymentStatus})
                     `;
                     return;
                 }
                 
-                // JIKA SAMPAI SINI, BERARTI SUKSES (payment_status=1 ATAU STATUS=SUCCESS)
-                
+                // ========== JIKA SUKSES ==========
                 // Sembunyikan pending, tampilkan success
                 document.getElementById('pendingArea').style.display = 'none';
                 document.getElementById('successArea').classList.remove('hidden');
                 
-                // Update tampilan dengan data dari URL
+                // Update tampilan
                 document.getElementById('amount').textContent = formatRupiah(AMOUNT_FIXED);
                 document.getElementById('time').textContent = getCurrentTime();
                 document.getElementById('invoiceDisplay').textContent = invoice;
                 
-                const cleanPhone = phone.replace(/\D/g, '');
+                const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
                 const localPhone = formatPhoneLocal(cleanPhone);
                 document.getElementById('phoneDisplay').textContent = localPhone || 'Tidak tersedia';
                 document.getElementById('phoneLink').textContent = localPhone || 'Tidak tersedia';
@@ -718,6 +689,10 @@ Salam hangat,
                     document.getElementById('waStatus').innerHTML = '⚠️ Nomor WA tidak tersedia. Key dapat disalin manual.';
                 }
                 
+                // HAPUS SESSION STORAGE setelah dipakai
+                sessionStorage.removeItem('customer_phone');
+                sessionStorage.removeItem('customer_invoice');
+                
             } catch (error) {
                 console.error('❌ ERROR:', error);
                 
@@ -725,13 +700,9 @@ Salam hangat,
                 document.getElementById('pendingArea').style.display = 'block';
                 document.getElementById('successArea').classList.add('hidden');
                 
-                document.getElementById('pendingArea').innerHTML = `
-                    <h3>❌ Terjadi Kesalahan</h3>
-                    <p>${error.message}</p>
-                    <p>Silakan hubungi admin jika masalah berlanjut.</p>
-                    <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 15px;">
-                        🏠 Kembali ke Menu Utama
-                    </a>
+                document.getElementById('pendingInfo').innerHTML = `
+                    <strong>Error:</strong> ${error.message}<br>
+                    Silakan hubungi admin.
                 `;
             }
         };
