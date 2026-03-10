@@ -299,7 +299,7 @@
         </div>
         
         <div class="key-card">
-            <div class="key-title">🔑 LICENSE KEY ANDA</div>
+            <div class="key-title">🔑 LICENSE KEY VIP ANDA</div>
             <div class="key-display" id="keyDisplay">Memproses...</div>
         </div>
         
@@ -342,6 +342,7 @@
     <div class="copy-notification" id="copyNotification">✅ Key berhasil disalin</div>
     
     <script>
+        // Konfigurasi Firebase
         const firebaseConfig = {
             databaseURL: "https://sidiannext-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
@@ -349,6 +350,8 @@
         
         const ADMIN_PHONE = '6285849299253';
         const WHAPI_TOKEN = 'dUtoaA65nf39YiR4oJweRlGP5fCPZXek';
+        
+        // ================== FUNGSI FORMAT ==================
         
         function formatRupiah(amount) {
             return 'Rp ' + parseInt(amount).toLocaleString('id-ID');
@@ -390,13 +393,15 @@
             return cleaned;
         }
         
+        // ================== FUNGSI KEY ==================
+        
         function generateKey() {
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let key = '';
             for (let i = 0; i < 8; i++) {
                 key += chars.charAt(Math.floor(Math.random() * chars.length));
             }
-            return 'PLTX-' + key;
+            return key; // 8 karakter, tanpa prefix
         }
         
         window.copyKey = function() {
@@ -410,14 +415,44 @@
             }
         };
         
-        async function sendViaWhapi(phone, key, invoice, amount) {
+        // ================== FUNGSI FIREBASE ==================
+        
+        async function saveKeyToFirebase(key, invoice, phone) {
+            try {
+                // Simpan ke Keys/[key] dengan struktur yang benar
+                await firebase.database().ref('Keys/' + key).set({
+                    ActivatedAt: 0,
+                    Devices: "null",
+                    MaxDevices: 1,
+                    Type: "Duration",
+                    Value: "30d"
+                });
+                
+                console.log('✅ Key tersimpan di Keys/' + key);
+                
+                // Update transaksi dengan info key (opsional)
+                await firebase.database().ref('transactions/' + invoice).update({
+                    generatedKey: key,
+                    keySentTo: phone
+                });
+                
+                return true;
+            } catch (error) {
+                console.error('❌ Gagal simpan key:', error);
+                return false;
+            }
+        }
+        
+        // ================== FUNGSI WHATSAPP ==================
+        
+        async function sendViaWhapi(phone, fullKey, invoice, amount) {
             const statusDiv = document.getElementById('waStatus');
             statusDiv.style.display = 'block';
-            statusDiv.innerHTML = '📤 Mengirim key via WhatsApp...';
+            statusDiv.innerHTML = '📤 Mengirimkan key VIP via WhatsApp...';
             
             if (!phone || phone.length < 10) {
                 statusDiv.className = 'status-message status-error';
-                statusDiv.innerHTML = '❌ Nomor WA tidak valid. Tapi key bisa disalin manual.';
+                statusDiv.innerHTML = '❌ Nomor WhatsApp tidak valid. Key dapat disalin manual.';
                 return false;
             }
             
@@ -435,67 +470,74 @@
                     },
                     body: JSON.stringify({
                         to: formattedPhone,
-                        body: `🎉 *PEMBAYARAN BERHASIL!*
+                        body: `✨ *PEMBAYARAN BERHASIL* ✨
 
-Terima kasih telah melakukan pembayaran.
+Yth. Pelanggan PlutoXTeam,
 
-🔑 *KEY PREMIUM ANDA*
-\`${key}\`
+Terima kasih telah melakukan pembayaran. Berikut adalah detail transaksi dan key VIP Anda.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔑 *KEY VIP ANDA*
+\`${fullKey}\`
 
 📋 *DETAIL TRANSAKSI*
-Invoice : ${invoice}
-Total   : ${formattedAmount}
-Waktu   : ${currentTime}
+• Invoice     : ${invoice}
+• Total       : ${formattedAmount}
+• Waktu       : ${currentTime}
+• Masa Berlaku: 30 hari (hingga ${expireDate})
 
-⏰ Masa berlaku: 30 hari (hingga ${expireDate})
+📌 *CARA AKTIVASI*
+1. Buka aplikasi PlutoXTeam
+2. Masukkan key: ${fullKey}
+3. Klik tombol Aktivasi
+4. Nikmati layanan premium
 
-📞 Butuh bantuan? Hubungi:
-085849299253 (Admin)
+📞 *BUTUH BANTUAN?*
+Hubungi admin kami:
+• WhatsApp: 0858-4929-9253
+• Email   : support@plutoxteam.com
 
-*PlutoXTeam* 🚀`
+Terima kasih atas kepercayaan Anda.
+Salam hangat,
+*Manajemen PlutoXTeam* 🚀`
                     })
                 });
                 
                 if (response.ok) {
                     statusDiv.className = 'status-message status-success';
-                    statusDiv.innerHTML = '✅ Key berhasil dikirim ke WhatsApp!';
+                    statusDiv.innerHTML = '✅ Key VIP berhasil dikirim ke WhatsApp!';
                     document.getElementById('waLink').href = `https://wa.me/${formattedPhone}`;
                     return true;
                 } else {
-                    throw new Error('Gagal kirim WA');
+                    throw new Error('Gagal mengirim');
                 }
                 
             } catch (error) {
                 statusDiv.className = 'status-message status-error';
-                statusDiv.innerHTML = '❌ Gagal kirim WA, tapi key bisa disalin manual.';
+                statusDiv.innerHTML = '❌ Gagal mengirim ke WhatsApp. Key dapat disalin manual.';
                 return false;
             }
         }
         
-        async function saveKeyToFirebase(key, invoice, phone) {
-            try {
-                await firebase.database().ref('Keys/' + key).set({
-                    phone: phone,
-                    invoice: invoice,
-                    activatedAt: Date.now(),
-                    source: 'success_page'
-                });
-                return true;
-            } catch (error) {
-                console.error('Gagal simpan key:', error);
-                return false;
-            }
-        }
+        // ================== FUNGSI LAIN ==================
         
         window.contactAdmin = function() {
-            window.location.href = `https://wa.me/${ADMIN_PHONE}?text=Halo%20admin%20PlutoXTeam%2C%20saya%20butuh%20bantuan%20terkait%20key%20premium%20saya`;
+            window.location.href = `https://wa.me/${ADMIN_PHONE}?text=Halo%20admin%20PlutoXTeam%2C%20saya%20butuh%20bantuan%20terkait%20key%20VIP%20saya`;
         };
+        
+        window.handleLogoError = function() {
+            document.getElementById('mainLogo').style.display = 'none';
+            document.getElementById('logoFallback').style.display = 'block';
+        };
+        
+        // ================== MAIN ==================
         
         window.onload = async function() {
             try {
                 document.getElementById('waStatus').style.display = 'block';
-                document.getElementById('waStatus').innerHTML = '⏳ Mencari data transaksi...';
+                document.getElementById('waStatus').innerHTML = '⏳ Mengambil data transaksi...';
                 
+                // Ambil transaksi terbaru
                 const snapshot = await firebase.database().ref('transactions')
                     .orderByChild('timestamp')
                     .limitToLast(1)
@@ -511,9 +553,11 @@ Waktu   : ${currentTime}
                 const latestInvoice = invoiceKeys[invoiceKeys.length - 1];
                 const transaction = transactions[latestInvoice];
                 
+                // Bersihkan nomor
                 const phone = transaction.phone || '';
                 const cleanPhone = phone.replace(/\D/g, '');
                 
+                // Update tampilan
                 document.getElementById('invoice').textContent = latestInvoice;
                 document.getElementById('amount').textContent = formatRupiah(transaction.amount || 50000);
                 document.getElementById('time').textContent = getCurrentTime();
@@ -522,19 +566,25 @@ Waktu   : ${currentTime}
                 document.getElementById('phoneDisplay').textContent = localPhone;
                 document.getElementById('phoneLink').textContent = localPhone;
                 
-                const licenseKey = generateKey();
-                document.getElementById('keyDisplay').textContent = licenseKey;
+                // Generate key
+                const rawKey = generateKey();                 // "WBHLBWZ2"
+                const fullKey = 'Key_VIP-' + rawKey;          // "Key_VIP-WBHLBWZ2"
                 
-                await saveKeyToFirebase(licenseKey, latestInvoice, cleanPhone);
+                document.getElementById('keyDisplay').textContent = fullKey;
                 
+                // Simpan key ke Firebase (rawKey)
+                await saveKeyToFirebase(rawKey, latestInvoice, cleanPhone);
+                
+                // Kirim WA (fullKey)
                 if (cleanPhone && cleanPhone.length >= 10) {
-                    await sendViaWhapi(cleanPhone, licenseKey, latestInvoice, transaction.amount || 50000);
+                    await sendViaWhapi(cleanPhone, fullKey, latestInvoice, transaction.amount || 50000);
                 } else {
                     document.getElementById('waStatus').className = 'status-message status-error';
                     document.getElementById('waStatus').innerHTML = '❌ Nomor WA tidak valid. Hubungi admin.';
                 }
                 
             } catch (error) {
+                console.error(error);
                 document.getElementById('waStatus').className = 'status-message status-error';
                 document.getElementById('waStatus').innerHTML = '❌ Gagal memuat data. Hubungi admin.';
                 document.getElementById('keyDisplay').textContent = 'Gagal memuat key';
