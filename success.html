@@ -198,6 +198,12 @@
             border: 1px solid #f5c6cb;
         }
         
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        
         .btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -266,6 +272,25 @@
         .copy-notification.show {
             opacity: 1;
         }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 20px;
+            border-radius: 16px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .warning-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -277,59 +302,79 @@
             </div>
         </div>
         
-        <h1>Pembayaran Berhasil! ✅</h1>
-        
-        <div class="info-card" id="transactionInfo">
-            <!-- BARIS INVOICE TELAH DIHAPUS -->
-            <div class="info-row">
-                <span class="info-label">Total</span>
-                <span class="info-value" id="amount">Memproses...</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Waktu</span>
-                <span class="info-value" id="time">Memproses...</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Nomor WA</span>
-                <span class="info-value" id="phoneDisplay">Memproses...</span>
-            </div>
-        </div>
-        
-        <div class="key-card">
-            <div class="key-title">🔑 LICENSE KEY VIP ANDA</div>
-            <div class="key-display" id="keyDisplay">Memproses...</div>
-        </div>
-        
-        <button onclick="copyKey()" class="btn btn-copy" id="copyBtn">📋 Salin Key</button>
-        
-        <div id="waStatus" class="status-message"></div>
-        
-        <div class="whatsapp-section">
-            <div class="whatsapp-title">
-                <svg viewBox="0 0 24 24">
-                    <path d="M19.05 4.91A9.816 9.816 0 0 0 12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01zm-7.01 15.24c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.32a8.26 8.26 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.82 2.42a8.24 8.24 0 0 1 2.41 5.83c.01 4.54-3.69 8.23-8.22 8.23z"/>
-                </svg>
-                <span>Key juga dikirim via WhatsApp</span>
+        <!-- AREA SUKSES (HIDDEN DEFAULT) -->
+        <div id="successArea" class="hidden">
+            <h1>Pembayaran Berhasil! ✅</h1>
+            
+            <div class="info-card">
+                <div class="info-row">
+                    <span class="info-label">Total</span>
+                    <span class="info-value" id="amount">Rp 50.000</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Waktu</span>
+                    <span class="info-value" id="time">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Nomor WA</span>
+                    <span class="info-value" id="phoneDisplay">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Invoice</span>
+                    <span class="info-value" id="invoiceDisplay">-</span>
+                </div>
             </div>
             
-            <div class="whatsapp-text">
-                Key aktivasi akan dikirim ke nomor WhatsApp Anda. 
+            <div class="key-card">
+                <div class="key-title">🔑 LICENSE KEY VIP ANDA</div>
+                <div class="key-display" id="keyDisplay">-</div>
             </div>
             
-            <div class="phone-display" id="phoneLink"></div>
+            <button onclick="copyKey()" class="btn btn-copy" id="copyBtn">📋 Salin Key</button>
             
-            <a href="#" id="waLink" class="btn btn-wa" target="_blank">
-                📱 Buka WhatsApp
+            <div id="waStatus" class="status-message"></div>
+            
+            <div class="whatsapp-section">
+                <div class="whatsapp-title">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19.05 4.91A9.816 9.816 0 0 0 12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01zm-7.01 15.24c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.32a8.26 8.26 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.82 2.42a8.24 8.24 0 0 1 2.41 5.83c.01 4.54-3.69 8.23-8.22 8.23z"/>
+                    </svg>
+                    <span>Key juga dikirim via WhatsApp</span>
+                </div>
+                
+                <div class="whatsapp-text">
+                    Key aktivasi akan dikirim ke nomor WhatsApp Anda. 
+                </div>
+                
+                <div class="phone-display" id="phoneLink"></div>
+                
+                <a href="#" id="waLink" class="btn btn-wa" target="_blank">
+                    📱 Buka WhatsApp
+                </a>
+            </div>
+            
+            <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home">
+                🏠 Kembali ke Menu Utama
+            </a>
+            
+            <a href="#" onclick="contactAdmin()" class="btn btn-wa" style="margin-top: 10px;">
+                📞 Hubungi Admin (085849299253)
             </a>
         </div>
-        
-        <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" id="backToHome">
-            🏠 Kembali ke Menu Utama
-        </a>
-        
-        <a href="#" onclick="contactAdmin()" class="btn btn-wa" style="margin-top: 10px;">
-            📞 Hubungi Admin (085849299253)
-        </a>
+
+        <!-- AREA PENDING/MENUNGGU (KEMBALI KE MERCHANT TANPA BAYAR) -->
+        <div id="pendingArea" class="warning-box">
+            <h3>⏳ Menunggu Pembayaran</h3>
+            <p>Anda kembali ke merchant sebelum menyelesaikan pembayaran.</p>
+            <p>Silakan selesaikan pembayaran Anda di halaman DOKU.</p>
+            <p style="margin-top: 15px; font-size: 13px;">Jika sudah membayar, tunggu beberapa saat hingga notifikasi masuk.</p>
+            <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-premium" style="background: #f0933b; margin-top: 15px;">
+                💳 Kembali ke Halaman Pembayaran
+            </a>
+            <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 10px;">
+                🏠 Kembali ke Menu Utama
+            </a>
+        </div>
         
         <div class="footer">
             <strong>PlutoXTeam</strong>
@@ -347,6 +392,7 @@
         
         const ADMIN_PHONE = '6285849299253';
         const WHAPI_TOKEN = 'dUtoaA65nf39YiR4oJweRlGP5fCPZXek';
+        const AMOUNT_FIXED = 50000; // HARGA FIX RP 50.000
         
         // ================== FUNGSI FORMAT ==================
         
@@ -390,7 +436,7 @@
             return cleaned;
         }
         
-        // ================== FUNGSI KEY ANTI DUPLIKAT ==================
+        // ================== FUNGSI KEY ==================
         
         function generateRandomPart() {
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
@@ -438,7 +484,7 @@
         
         window.copyKey = function() {
             const key = document.getElementById('keyDisplay').innerText;
-            if (key && !key.includes('Memproses') && !key.includes('Gagal')) {
+            if (key && !key.includes('Memproses') && !key.includes('Gagal') && key !== '-') {
                 navigator.clipboard.writeText(key).then(() => {
                     const notification = document.getElementById('copyNotification');
                     notification.classList.add('show');
@@ -456,17 +502,12 @@
                     Devices: "null",
                     MaxDevices: 1,
                     Type: "Duration",
-                    Value: "30d"
+                    Value: "30d",
+                    generated_for: invoice,
+                    customer_phone: phone
                 });
                 
                 console.log('✅ Key tersimpan di Keys/' + key);
-                
-                // Update transaksi (opsional)
-                await firebase.database().ref('transactions/' + invoice).update({
-                    generatedKey: key,
-                    keySentTo: phone
-                });
-                
                 return true;
             } catch (error) {
                 console.error('❌ Gagal simpan key:', error);
@@ -476,7 +517,7 @@
         
         // ================== FUNGSI WHATSAPP ==================
         
-        async function sendViaWhapi(phone, key, invoice, amount) {
+        async function sendViaWhapi(phone, key, invoice) {
             const statusDiv = document.getElementById('waStatus');
             statusDiv.style.display = 'block';
             statusDiv.innerHTML = '📤 Mengirimkan key VIP via WhatsApp...';
@@ -489,7 +530,7 @@
             
             try {
                 const formattedPhone = formatPhoneApi(phone);
-                const formattedAmount = formatRupiah(amount);
+                const formattedAmount = formatRupiah(AMOUNT_FIXED);
                 const currentTime = getCurrentTime();
                 const expireDate = getExpireDate();
                 
@@ -511,9 +552,9 @@ Terima kasih telah melakukan pembayaran. Berikut adalah detail transaksi dan key
 \`${key}\`
 
 📋 *DETAIL TRANSAKSI*
-• Total          : ${formattedAmount}
-• Waktu         : ${currentTime}
-• Masa Berlaku : 30 hari (hingga ${expireDate})
+• Total       : ${formattedAmount}
+• Waktu       : ${currentTime}
+• Masa Berlaku: 30 hari (hingga ${expireDate})
 
 📌 *CARA AKTIVASI*
 1. Buka aplikasi
@@ -563,57 +604,105 @@ Salam hangat,
         
         window.onload = async function() {
             try {
-                document.getElementById('waStatus').style.display = 'block';
-                document.getElementById('waStatus').innerHTML = '⏳ Mengambil data transaksi...';
+                // Ambil parameter dari URL
+                const urlParams = new URLSearchParams(window.location.search);
                 
-                // Ambil transaksi terbaru
-                const snapshot = await firebase.database().ref('transactions')
-                    .orderByChild('timestamp')
-                    .limitToLast(1)
-                    .once('value');
+                // Coba ambil invoice dari berbagai kemungkinan parameter
+                const invoice = urlParams.get('invoice') || 
+                               urlParams.get('INVOICE') || 
+                               urlParams.get('order_id') ||
+                               urlParams.get('ORDER_ID') ||
+                               urlParams.get('trx_id');
                 
-                const transactions = snapshot.val();
+                // Coba ambil status
+                const status = urlParams.get('status') || 
+                              urlParams.get('result') || 
+                              urlParams.get('STATUS') || 
+                              'UNKNOWN';
                 
-                if (!transactions) {
-                    throw new Error('Belum ada transaksi');
+                // Coba ambil nomor telepon (opsional)
+                const phone = urlParams.get('phone') || 
+                             urlParams.get('PHONE') || 
+                             urlParams.get('customer_phone') || 
+                             '';
+                
+                console.log('URL Params:', { invoice, status, phone });
+                
+                // CEK APAKAH INI DARI KEMBALI KE MERCHANT ATAU SUKSES?
+                // Jika tidak ada invoice, atau status bukan SUCCESS -> ANGGAP PENDING
+                if (!invoice || status.toUpperCase() !== 'SUCCESS') {
+                    // Tampilkan area pending
+                    document.getElementById('pendingArea').style.display = 'block';
+                    document.getElementById('successArea').classList.add('hidden');
+                    
+                    // Update status message
+                    document.getElementById('pendingArea').innerHTML = `
+                        <h3>⏳ Menunggu Pembayaran</h3>
+                        <p>Anda kembali ke merchant sebelum menyelesaikan pembayaran.</p>
+                        <p style="margin-top: 10px;"><strong>Invoice:</strong> ${invoice || 'Tidak ada'}</p>
+                        <p><strong>Status:</strong> ${status || 'PENDING'}</p>
+                        <p>Silakan selesaikan pembayaran Anda di halaman DOKU.</p>
+                        <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-premium" style="background: #f0933b; margin-top: 15px;">
+                            💳 Kembali ke Halaman Pembayaran
+                        </a>
+                        <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 10px;">
+                            🏠 Kembali ke Menu Utama
+                        </a>
+                    `;
+                    return;
                 }
                 
-                const invoiceKeys = Object.keys(transactions);
-                const latestInvoice = invoiceKeys[invoiceKeys.length - 1];
-                const transaction = transactions[latestInvoice];
+                // JIKA SAMPAI SINI, BERARTI STATUS SUCCESS DAN ADA INVOICE
                 
-                // Bersihkan nomor
-                const phone = transaction.phone || '';
-                const cleanPhone = phone.replace(/\D/g, '');
+                // Sembunyikan pending, tampilkan success
+                document.getElementById('pendingArea').style.display = 'none';
+                document.getElementById('successArea').classList.remove('hidden');
                 
-                // Update tampilan (INVOICE TIDAK DITAMPILKAN LAGI)
-                document.getElementById('amount').textContent = formatRupiah(transaction.amount || 50000);
+                // Update tampilan dengan data dari URL
+                document.getElementById('amount').textContent = formatRupiah(AMOUNT_FIXED);
                 document.getElementById('time').textContent = getCurrentTime();
+                document.getElementById('invoiceDisplay').textContent = invoice;
                 
+                const cleanPhone = phone.replace(/\D/g, '');
                 const localPhone = formatPhoneLocal(cleanPhone);
-                document.getElementById('phoneDisplay').textContent = localPhone;
-                document.getElementById('phoneLink').textContent = localPhone;
+                document.getElementById('phoneDisplay').textContent = localPhone || 'Tidak tersedia';
+                document.getElementById('phoneLink').textContent = localPhone || 'Tidak tersedia';
                 
-                // ===== GENERATE KEY UNIK =====
+                // Tampilkan status loading
+                document.getElementById('waStatus').style.display = 'block';
+                document.getElementById('waStatus').className = 'status-message';
+                document.getElementById('waStatus').innerHTML = '⏳ Membuat key VIP...';
+                
+                // Generate key unik
                 const fullKey = await generateUniqueKey();
                 document.getElementById('keyDisplay').textContent = fullKey;
                 
-                // Simpan ke Firebase
-                await saveKeyToFirebase(fullKey, latestInvoice, cleanPhone);
+                // Simpan key ke Firebase
+                await saveKeyToFirebase(fullKey, invoice, cleanPhone);
                 
-                // Kirim WA
+                // Kirim WA jika nomor tersedia
                 if (cleanPhone && cleanPhone.length >= 10) {
-                    await sendViaWhapi(cleanPhone, fullKey, latestInvoice, transaction.amount || 50000);
+                    await sendViaWhapi(cleanPhone, fullKey, invoice);
                 } else {
-                    document.getElementById('waStatus').className = 'status-message status-error';
-                    document.getElementById('waStatus').innerHTML = '❌ Nomor WA tidak valid. Hubungi admin.';
+                    document.getElementById('waStatus').className = 'status-message status-warning';
+                    document.getElementById('waStatus').innerHTML = '⚠️ Nomor WA tidak tersedia. Key dapat disalin manual.';
                 }
                 
             } catch (error) {
                 console.error('❌ ERROR:', error);
-                document.getElementById('waStatus').className = 'status-message status-error';
-                document.getElementById('waStatus').innerHTML = '❌ Gagal memuat data. Hubungi admin.';
-                document.getElementById('keyDisplay').textContent = 'Gagal memuat key';
+                
+                // Tampilkan error di area pending
+                document.getElementById('pendingArea').style.display = 'block';
+                document.getElementById('successArea').classList.add('hidden');
+                
+                document.getElementById('pendingArea').innerHTML = `
+                    <h3>❌ Terjadi Kesalahan</h3>
+                    <p>${error.message}</p>
+                    <p>Silakan hubungi admin jika masalah berlanjut.</p>
+                    <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 15px;">
+                        🏠 Kembali ke Menu Utama
+                    </a>
+                `;
             }
         };
     </script>
