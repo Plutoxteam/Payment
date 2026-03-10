@@ -282,7 +282,7 @@
         <div class="info-card" id="transactionInfo">
             <div class="info-row">
                 <span class="info-label">Invoice</span>
-                <span class="info-value" id="invoice">INV-xxxxxxxx</span>
+                <span class="info-value" id="invoice">Memproses...</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Total</span>
@@ -353,7 +353,7 @@
         const WHAPI_TOKEN = 'dUtoaA65nf39YiR4oJweRlGP5fCPZXek';
         
         /**
-         * Bersihin nomor dari karakter non-digit
+         * Membersihkan nomor telepon dari karakter non-digit
          */
         function cleanPhone(phone) {
             if (!phone) return '';
@@ -361,53 +361,15 @@
         }
 
         /**
-         * Ambil data dari URL dan Firebase
+         * Format Rupiah
          */
-        async function getTransactionData() {
-            const params = new URLSearchParams(window.location.search);
-            
-            // Invoice dari URL
-            const invoice = params.get('invoice') || params.get('order_id');
-            
-            if (!invoice) {
-                console.error('Invoice tidak ditemukan di URL');
-                return null;
-            }
-            
-            // Coba ambil dari Firebase dulu (webhook sudah simpan)
-            const snapshot = await firebase.database().ref('transactions/' + invoice).once('value');
-            const fbData = snapshot.val();
-            
-            if (fbData && fbData.phone) {
-                console.log('✅ Data dari Firebase:', fbData);
-                return {
-                    invoice: invoice,
-                    amount: fbData.amount || params.get('amount') || '50000',
-                    phone: fbData.phone
-                };
-            }
-            
-            // Fallback ke URL (kalo webhook belum masuk)
-            console.log('⚠️ Data Firebase kosong, pake URL');
-            let phone = params.get('Nomor WA') || 
-                        params.get('custom_field2') || 
-                        params.get('phone') || 
-                        params.get('customer_phone') || 
-                        '';
-            
-            return {
-                invoice: invoice,
-                amount: params.get('amount') || params.get('gross_amount') || '50000',
-                phone: cleanPhone(phone)
-            };
-        }
-        
-        // Format Rupiah
         function formatRupiah(amount) {
             return 'Rp ' + parseInt(amount).toLocaleString('id-ID');
         }
         
-        // Format waktu
+        /**
+         * Format waktu
+         */
         function getCurrentTime() {
             const now = new Date();
             return now.toLocaleDateString('id-ID', { 
@@ -419,7 +381,22 @@
             });
         }
         
-        // Format nomor untuk tampilan (08xxx)
+        /**
+         * Format tanggal expire (30 hari dari sekarang)
+         */
+        function getExpireDate() {
+            const date = new Date();
+            date.setDate(date.getDate() + 30);
+            return date.toLocaleDateString('id-ID', { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            });
+        }
+        
+        /**
+         * Format nomor untuk tampilan (08xxx)
+         */
         function formatPhoneLocal(phone) {
             if (!phone) return 'Nomor tidak tersedia';
             
@@ -434,7 +411,9 @@
             return '0' + cleaned;
         }
         
-        // Format nomor untuk API (62xxx)
+        /**
+         * Format nomor untuk API (62xxx)
+         */
         function formatPhoneApi(phone) {
             let cleaned = phone.replace(/\D/g, '');
             if (cleaned.startsWith('0')) {
@@ -445,7 +424,9 @@
             return cleaned;
         }
         
-        // Generate key
+        /**
+         * Generate key
+         */
         function generateKey() {
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let key = '';
@@ -455,19 +436,23 @@
             return 'PLTX-' + key;
         }
         
-        // Copy key
+        /**
+         * Copy key ke clipboard
+         */
         window.copyKey = function() {
             const key = document.getElementById('keyDisplay').innerText;
-            if (key && key !== 'Memproses...') {
+            if (key && key !== 'Memproses...' && key !== 'Gagal memuat key') {
                 navigator.clipboard.writeText(key).then(() => {
                     const notification = document.getElementById('copyNotification');
                     notification.classList.add('show');
                     setTimeout(() => notification.classList.remove('show'), 2000);
-                });
+                }).catch(() => alert('Gagal menyalin key'));
             }
         };
         
-        // Kirim WA (TANPA NAMA)
+        /**
+         * Kirim WA via WHAPI (TANPA NAMA)
+         */
         async function sendViaWhapi(phone, key, invoice, amount) {
             const statusDiv = document.getElementById('waStatus');
             statusDiv.style.display = 'block';
@@ -482,6 +467,7 @@
             try {
                 const formattedPhone = formatPhoneApi(phone);
                 const formattedAmount = formatRupiah(amount);
+                const currentTime = getCurrentTime();
                 
                 const response = await fetch('https://gate.whapi.cloud/messages/text', {
                     method: 'POST',
@@ -501,7 +487,7 @@ Terima kasih telah melakukan pembayaran.
 📋 *DETAIL TRANSAKSI*
 Invoice : ${invoice}
 Total   : ${formattedAmount}
-Waktu   : ${getCurrentTime()}
+Waktu   : ${currentTime}
 
 ⏰ Key berlaku 30 hari
 
@@ -512,14 +498,16 @@ Waktu   : ${getCurrentTime()}
                     })
                 });
                 
+                const result = await response.json();
+                console.log('WA Response:', result);
+                
                 if (response.ok) {
                     statusDiv.className = 'status-message status-success';
                     statusDiv.innerHTML = '✅ Key berhasil dikirim ke WhatsApp!';
-                    
                     document.getElementById('waLink').href = `https://wa.me/${formattedPhone}`;
                     return true;
                 } else {
-                    throw new Error('Gagal kirim');
+                    throw new Error(result.message || 'Gagal kirim WA');
                 }
                 
             } catch (error) {
@@ -530,65 +518,109 @@ Waktu   : ${getCurrentTime()}
             }
         }
         
-        // Simpan key ke Firebase
+        /**
+         * Simpan key ke Firebase - TANPA FIELD INVOICE (cukup node)
+         */
         async function saveKeyToFirebase(key, invoice, phone) {
             try {
+                // Simpan key dengan reference ke transaction
                 await firebase.database().ref('Keys/' + key).set({
-                    Type: 'Duration',
-                    Value: '30d',
-                    MaxDevices: 1,
-                    ActivatedAt: Date.now(),
-                    invoice: invoice,
                     phone: phone,
-                    source: 'doku_payment'
+                    activatedAt: Date.now(),
+                    transactionRef: `transactions/${invoice}` // reference ke transaksi
                 });
-                console.log('✅ Key tersimpan');
+                console.log('✅ Key tersimpan di Firebase');
                 return true;
             } catch (error) {
-                console.error('❌ Gagal simpan:', error);
+                console.error('❌ Gagal simpan ke Firebase:', error);
                 return false;
             }
         }
         
-        // Hubungi admin
+        /**
+         * Hubungi admin via WA
+         */
         window.contactAdmin = function() {
             window.location.href = `https://wa.me/${ADMIN_PHONE}?text=Halo%20admin%20PlutoXTeam%2C%20saya%20butuh%20bantuan%20terkait%20key%20premium%20saya`;
         };
         
-        // MAIN FUNCTION
+        /**
+         * Handle logo error
+         */
+        window.handleLogoError = function() {
+            document.getElementById('mainLogo').style.display = 'none';
+            document.getElementById('logoFallback').style.display = 'block';
+        };
+        
+        /**
+         * MAIN FUNCTION - JALANKAN SAAT HALAMAN LOAD
+         */
         window.onload = async function() {
-            // Ambil data (prioritas Firebase, fallback URL)
-            const data = await getTransactionData();
-            
-            if (!data) {
-                alert('Invoice tidak ditemukan');
-                return;
-            }
-            
-            // Update tampilan
-            document.getElementById('invoice').textContent = data.invoice;
-            document.getElementById('amount').textContent = formatRupiah(data.amount);
-            document.getElementById('time').textContent = getCurrentTime();
-            
-            const localPhone = formatPhoneLocal(data.phone);
-            document.getElementById('phoneDisplay').textContent = localPhone;
-            document.getElementById('phoneLink').textContent = localPhone;
-            
-            // Generate key
-            const licenseKey = generateKey();
-            document.getElementById('keyDisplay').textContent = licenseKey;
-            
-            // Simpan ke Firebase
-            await saveKeyToFirebase(licenseKey, data.invoice, data.phone);
-            
-            // Kirim WA (hanya jika nomor valid)
-            if (data.phone && data.phone.length >= 10) {
-                await sendViaWhapi(data.phone, licenseKey, data.invoice, data.amount);
-            } else {
-                const statusDiv = document.getElementById('waStatus');
-                statusDiv.style.display = 'block';
-                statusDiv.className = 'status-message status-error';
-                statusDiv.innerHTML = '❌ Nomor WA tidak valid. Silakan hubungi admin.';
+            try {
+                // 1. AMBIL INVOICE DARI URL - PERSIS DARI DOKU
+                const params = new URLSearchParams(window.location.search);
+                const invoice = params.get('invoice') || params.get('order_id');
+                
+                if (!invoice) {
+                    throw new Error('Invoice tidak ditemukan di URL');
+                }
+                
+                console.log('🔍 Invoice dari URL:', invoice);
+                document.getElementById('invoice').textContent = invoice;
+                
+                // 2. AMBIL DATA DARI URL (FALLBACK)
+                let phone = params.get('Nomor WA') || 
+                            params.get('custom_field2') || 
+                            params.get('phone') || 
+                            '';
+                let amount = params.get('amount') || params.get('gross_amount') || '50000';
+                
+                // 3. COBA AMBIL DARI FIREBASE (WEBHOOK SUDAH SIMPAN)
+                console.log('🔍 Mencari data di Firebase...');
+                const snapshot = await firebase.database().ref('transactions/' + invoice).once('value');
+                const transaction = snapshot.val();
+                
+                if (transaction) {
+                    console.log('✅ Data ditemukan di Firebase:', transaction);
+                    // Update dengan data dari webhook (lebih akurat)
+                    if (transaction.phone) phone = transaction.phone;
+                    if (transaction.amount) amount = transaction.amount;
+                } else {
+                    console.log('⚠️ Data tidak ditemukan di Firebase, pakai fallback URL');
+                }
+                
+                // 4. BERSIHKAN NOMOR
+                const cleanPhoneNumber = cleanPhone(phone);
+                
+                // 5. UPDATE TAMPILAN
+                document.getElementById('amount').textContent = formatRupiah(amount);
+                document.getElementById('time').textContent = getCurrentTime();
+                
+                const localPhone = formatPhoneLocal(cleanPhoneNumber);
+                document.getElementById('phoneDisplay').textContent = localPhone;
+                document.getElementById('phoneLink').textContent = localPhone;
+                
+                // 6. GENERATE KEY
+                const licenseKey = generateKey();
+                document.getElementById('keyDisplay').textContent = licenseKey;
+                
+                // 7. SIMPAN KEY KE FIREBASE
+                await saveKeyToFirebase(licenseKey, invoice, cleanPhoneNumber);
+                
+                // 8. KIRIM WA (HANYA JIKA NOMOR VALID)
+                if (cleanPhoneNumber && cleanPhoneNumber.length >= 10) {
+                    await sendViaWhapi(cleanPhoneNumber, licenseKey, invoice, amount);
+                } else {
+                    const statusDiv = document.getElementById('waStatus');
+                    statusDiv.style.display = 'block';
+                    statusDiv.className = 'status-message status-error';
+                    statusDiv.innerHTML = '❌ Nomor WA tidak valid. Silakan hubungi admin.';
+                }
+                
+            } catch (error) {
+                console.error('❌ ERROR:', error.message);
+                alert('Error: ' + error.message);
+                document.getElementById('keyDisplay').textContent = 'Gagal memuat key';
             }
         };
     </script>
