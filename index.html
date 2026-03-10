@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Pembayaran Berhasil - PlutoXTeam</title>
+    <title>PlutoXTeam - Aktivasi</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -47,6 +47,17 @@
             }
         }
         
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
         .logo-container {
             margin-bottom: 20px;
         }
@@ -72,133 +83,64 @@
         
         h1 {
             color: #333;
-            font-size: 26px;
+            font-size: 28px;
             margin-bottom: 8px;
         }
         
-        .info-card {
+        .subtitle {
+            color: #666;
+            margin-bottom: 24px;
+            font-size: 16px;
+        }
+        
+        .features {
             background: #f8f9fa;
             border-radius: 16px;
             padding: 20px;
             margin-bottom: 24px;
             text-align: left;
-            border: 1px solid #eaeaea;
         }
         
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px dashed #ddd;
-        }
-        
-        .info-row:last-child {
-            border-bottom: none;
-        }
-        
-        .info-label {
-            color: #888;
-            font-size: 14px;
-        }
-        
-        .info-value {
-            color: #333;
-            font-size: 16px;
-            font-weight: 600;
-        }
-        
-        .key-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 24px;
-            text-align: center;
-        }
-        
-        .key-title {
-            color: rgba(255,255,255,0.9);
-            font-size: 14px;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-        
-        .key-display {
-            background: rgba(255,255,255,0.2);
-            border-radius: 12px;
-            padding: 16px;
-            font-size: 18px;
-            font-weight: 700;
-            color: white;
-            font-family: monospace;
-            letter-spacing: 2px;
-            word-break: break-all;
-            border: 2px dashed rgba(255,255,255,0.5);
-        }
-        
-        .whatsapp-section {
-            background: #e8f5e9;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 24px;
-            border-left: 4px solid #25D366;
-        }
-        
-        .whatsapp-title {
+        .feature-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            color: #075E54;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .feature-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .feature-icon {
+            width: 32px;
+            height: 32px;
+            background: #e8f0fe;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
             font-weight: 700;
-            font-size: 16px;
-            margin-bottom: 12px;
         }
         
-        .whatsapp-title svg {
-            width: 20px;
-            height: 20px;
-            fill: #25D366;
+        .feature-text {
+            flex: 1;
         }
         
-        .whatsapp-text {
-            color: #2c3e50;
-            font-size: 14px;
-            margin-bottom: 12px;
+        .feature-text strong {
+            display: block;
+            color: #333;
+            font-size: 15px;
         }
         
-        .phone-display {
-            background: white;
-            border: 1px solid #25D366;
-            border-radius: 30px;
-            padding: 12px 16px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #075E54;
-            text-align: center;
-            margin: 10px 0;
-        }
-        
-        .status-message {
-            padding: 10px;
-            border-radius: 8px;
-            margin: 15px 0;
-            font-size: 14px;
-            display: none;
-        }
-        
-        .status-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .status-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        .feature-text small {
+            color: #888;
+            font-size: 13px;
         }
         
         .btn {
+            display: block;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
@@ -209,31 +151,40 @@
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 8px;
+            margin: 12px 0;
             text-decoration: none;
-            display: inline-block;
+            border: none;
         }
         
-        .btn-wa {
-            background: #25D366;
+        .btn-premium {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
         }
         
-        .btn-copy {
-            background: #6c757d;
-            margin-top: 10px;
+        .btn-trial {
+            background: linear-gradient(135deg, #f0933b 0%, #e67e22 100%);
         }
         
-        .btn-copy:hover {
-            background: #5a6268;
+        .btn-admin {
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+        }
+        
+        /* TOMBOL DOWNLOAD BARU */
+        .btn-download {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
         }
         
         .btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
         
-        .btn-home {
-            background: #667eea;
-            margin-top: 15px;
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-copy {
+            background: #6c757d;
+            margin: 10px 0;
         }
         
         .footer {
@@ -248,23 +199,122 @@
             color: #667eea;
         }
         
-        .copy-notification {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #333;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 14px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
+        /* NOTIFIKASI */
+        .notification {
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: left;
+            animation: slideIn 0.3s ease;
+            border-left-width: 4px;
+            border-left-style: solid;
         }
         
-        .copy-notification.show {
-            opacity: 1;
+        .notification.warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        
+        .notification.error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        
+        .notification.success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        
+        .notification.info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+        }
+        
+        .notification-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .notification-message {
+            font-size: 14px;
+            margin-left: 28px;
+        }
+        
+        /* FORM TRIAL */
+        .trial-form {
+            background: #f0f7ff;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+            border: 1px solid #cce5ff;
+        }
+        
+        .trial-form h3 {
+            color: #0056b3;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            border-radius: 30px;
+            font-size: 15px;
+            transition: border 0.2s;
+        }
+        
+        .form-group input:focus {
+            border-color: #0056b3;
+            outline: none;
+        }
+        
+        .form-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            margin-left: 16px;
+        }
+        
+        .key-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            font-family: monospace;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin: 15px 0;
+            word-break: break-all;
+        }
+        
+        .success-box {
+            background: #d4edda;
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -277,69 +327,66 @@
             </div>
         </div>
         
-        <h1>Pembayaran Berhasil! ✅</h1>
+        <!-- NOTIFIKASI AREA -->
+        <div id="notificationArea"></div>
         
-        <div class="info-card" id="transactionInfo">
-            <div class="info-row">
-                <span class="info-label">Invoice</span>
-                <span class="info-value" id="invoice">Memproses...</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Total</span>
-                <span class="info-value" id="amount">Memproses...</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Waktu</span>
-                <span class="info-value" id="time">Memproses...</span>
-            </div>
-            <div class="info-row">
-                <span class="info-label">Nomor WA</span>
-                <span class="info-value" id="phoneDisplay">Memproses...</span>
-            </div>
-        </div>
-        
-        <div class="key-card">
-            <div class="key-title">🔑 LICENSE KEY VIP ANDA</div>
-            <div class="key-display" id="keyDisplay">Memproses...</div>
-        </div>
-        
-        <button onclick="copyKey()" class="btn btn-copy" id="copyBtn">📋 Salin Key</button>
-        
-        <div id="waStatus" class="status-message"></div>
-        
-        <div class="whatsapp-section">
-            <div class="whatsapp-title">
-                <svg viewBox="0 0 24 24">
-                    <path d="M19.05 4.91A9.816 9.816 0 0 0 12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01zm-7.01 15.24c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.32a8.26 8.26 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.82 2.42a8.24 8.24 0 0 1 2.41 5.83c.01 4.54-3.69 8.23-8.22 8.23z"/>
-                </svg>
-                <span>Key juga dikirim via WhatsApp</span>
+        <!-- MENU UTAMA -->
+        <div id="mainMenu">
+            <h1>Pilih Opsi Aktivasi</h1>
+            <div class="subtitle">Dapatkan akses premium ke PlutoXTeam</div>
+            
+            <div class="features">
+                <div class="feature-item">
+                    <div class="feature-icon">✓</div>
+                    <div class="feature-text">
+                        <strong>Akses Penuh</strong>
+                        <small>Semua fitur aplikasi</small>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-text">
+                        <strong>Tanpa Iklan</strong>
+                        <small>Bebas gangguan iklan</small>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔄</div>
+                    <div class="feature-text">
+                        <strong>Update Gratis</strong>
+                        <small>Semua pembaruan terbaru</small>
+                    </div>
+                </div>
             </div>
             
-            <div class="whatsapp-text">
-                Key aktivasi akan dikirim ke nomor WhatsApp Anda. 
-            </div>
-            
-            <div class="phone-display" id="phoneLink"></div>
-            
-            <a href="#" id="waLink" class="btn btn-wa" target="_blank">
-                📱 Buka WhatsApp
+            <!-- TOMBOL BELI PREMIUM -->
+            <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-premium" target="_blank">
+                💳 Beli Key Premium (Rp 50.000)
             </a>
+            
+            <!-- TOMBOL TRIAL -->
+            <button onclick="handleTrialClick()" class="btn btn-trial" id="trialButton">
+                🎁 Coba Gratis 3 Hari
+            </button>
+            
+            <!-- TOMBOL UNDUH APK (BARU!) -->
+            <a href="download.html" class="btn btn-download">
+                📱 Unduh Aplikasi
+            </a>
+            
+            <!-- TOMBOL ADMIN -->
+            <a href="https://wa.me/6285849299253?text=Halo%20admin%20PlutoXTeam%2C%20saya%20ingin%20bertanya" class="btn btn-admin" target="_blank">
+                📞 Hubungi Admin (085849299253)
+            </a>
+            
+            <div class="footer">
+                <strong>PlutoXTeam</strong> · Pilih sesuai kebutuhan
+            </div>
         </div>
         
-        <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" id="backToHome">
-            🏠 Kembali ke Menu Utama
-        </a>
-        
-        <a href="#" onclick="contactAdmin()" class="btn btn-wa" style="margin-top: 10px;">
-            📞 Hubungi Admin (085849299253)
-        </a>
-        
-        <div class="footer">
-            <strong>PlutoXTeam</strong>
-        </div>
+        <!-- AREA TRIAL -->
+        <div id="trialArea" class="hidden"></div>
     </div>
-    
-    <div class="copy-notification" id="copyNotification">✅ Key berhasil disalin</div>
     
     <script>
         // Konfigurasi Firebase
@@ -350,288 +397,253 @@
         
         const ADMIN_PHONE = '6285849299253';
         const WHAPI_TOKEN = 'dUtoaA65nf39YiR4oJweRlGP5fCPZXek';
+        const DOKU_LINK = 'https://sandbox.doku.com/p-link/HDLMKO9gb3'; // Ganti dengan link DOKU asli
         
-        // ================== FUNGSI FORMAT ==================
-        
-        function formatRupiah(amount) {
-            return 'Rp ' + parseInt(amount).toLocaleString('id-ID');
-        }
-        
-        function getCurrentTime() {
-            const now = new Date();
-            return now.toLocaleDateString('id-ID', { 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
-        
-        function getExpireDate() {
-            const date = new Date();
-            date.setDate(date.getDate() + 30);
-            return date.toLocaleDateString('id-ID', { 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
-            });
-        }
-        
-        function formatPhoneLocal(phone) {
-            if (!phone) return 'Tidak tersedia';
+        function formatPhoneNumber(phone) {
             let cleaned = phone.replace(/\D/g, '');
-            if (cleaned.startsWith('62')) return '0' + cleaned.substring(2);
-            if (cleaned.startsWith('0')) return cleaned;
-            return '0' + cleaned;
-        }
-        
-        function formatPhoneApi(phone) {
-            let cleaned = phone.replace(/\D/g, '');
-            if (cleaned.startsWith('0')) return '62' + cleaned.substring(1);
-            if (!cleaned.startsWith('62')) return '62' + cleaned;
+            if (cleaned.startsWith('0')) {
+                return '62' + cleaned.substring(1);
+            }
+            if (!cleaned.startsWith('62')) {
+                return '62' + cleaned;
+            }
             return cleaned;
         }
         
-        // ================== FUNGSI KEY ANTI DUPLIKAT ==================
+        function showNotification(type, title, message) {
+            const area = document.getElementById('notificationArea');
+            const icons = {
+                warning: '⚠️',
+                error: '❌',
+                success: '✅',
+                info: 'ℹ️'
+            };
+            
+            area.innerHTML = `
+                <div class="notification ${type}">
+                    <div class="notification-title">
+                        <span>${icons[type] || 'ℹ️'}</span>
+                        <span>${title}</span>
+                    </div>
+                    <div class="notification-message">${message}</div>
+                </div>
+            `;
+        }
         
-        /**
-         * Generate 6 karakter random (hanya huruf kapital, tanpa I/O)
-         */
-        function generateRandomPart() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // 24 huruf
-            let result = '';
-            for (let i = 0; i < 6; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
+        function handleTrialClick() {
+            const params = new URLSearchParams(window.location.search);
+            const deviceId = params.get('device_id');
+            
+            if (!deviceId) {
+                showNotification('warning', 'Akses Trial Dibatasi', 
+                    'Untuk menggunakan key trial, harus masuk melalui aplikasi dan klik tombol "Coba Gratis 3 Hari" di dalam aplikasi.');
+                return;
             }
-            return result;
+            
+            prosesTrial(deviceId);
         }
         
-        /**
-         * Generate key lengkap dengan prefix VIP-
-         */
-        function generateKey() {
-            return 'VIP-' + generateRandomPart(); // Contoh: VIP-ABCDEF
-        }
-        
-        /**
-         * Cek apakah key sudah ada di Firebase
-         */
-        async function isKeyExists(key) {
+        async function prosesTrial(deviceId) {
+            const mainMenu = document.getElementById('mainMenu');
+            const trialArea = document.getElementById('trialArea');
+            
+            mainMenu.classList.add('hidden');
+            trialArea.classList.remove('hidden');
+            trialArea.innerHTML = '<div style="text-align: center; padding: 20px;">⏳ Memeriksa status device...</div>';
+            
             try {
-                const snapshot = await firebase.database().ref('Keys/' + key).once('value');
-                return snapshot.exists();
-            } catch (error) {
-                console.error('❌ Error cek key:', error);
-                return true; // Kalau error, anggap exist biar aman
-            }
-        }
-        
-        /**
-         * Generate key UNIK (dijamin belum dipakai)
-         */
-        async function generateUniqueKey() {
-            let attempts = 0;
-            const maxAttempts = 10;
-            
-            while (attempts < maxAttempts) {
-                const key = generateKey();
-                const exists = await isKeyExists(key);
+                const snapshot = await firebase.database().ref('trial_history/' + deviceId).once('value');
                 
-                if (!exists) {
-                    console.log(`✅ Key unik: ${key} (${attempts + 1} percobaan)`);
-                    return key;
+                if (snapshot.exists()) {
+                    trialArea.innerHTML = `
+                        <div class="notification error" style="margin-top: 0;">
+                            <div class="notification-title">❌ Trial Gagal</div>
+                            <div class="notification-message">Device ini sudah pernah menggunakan trial sebelumnya.</div>
+                        </div>
+                        <a href="https://wa.me/${ADMIN_PHONE}?text=Halo%20admin%20PlutoXTeam%2C%20saya%20ingin%20bertanya" class="btn btn-admin" target="_blank">
+                            📞 Hubungi Admin
+                        </a>
+                        <button onclick="kembaliKeMenu()" class="btn" style="background: #6c757d;">⬅️ Kembali</button>
+                    `;
+                } else {
+                    trialArea.innerHTML = `
+                        <h2 style="margin-bottom: 20px;">Coba Gratis 3 Hari</h2>
+                        <div class="trial-form">
+                            <h3>📋 Isi Data Trial</h3>
+                            
+                            <div class="form-group">
+                                <label>Nama</label>
+                                <input type="text" id="trialName" placeholder="Masukkan nama lengkap">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Nomor WhatsApp</label>
+                                <input type="tel" id="trialPhone" placeholder="Contoh: 081234567890">
+                                <div class="form-hint">Gunakan nomor aktif untuk menerima key</div>
+                            </div>
+                            
+                            <button onclick="generateTrialKey('${deviceId}')" class="btn btn-trial" id="generateBtn">
+                                🔑 Generate Key Trial
+                            </button>
+                            
+                            <button onclick="kembaliKeMenu()" class="btn" style="background: #6c757d; margin-top: 10px;">
+                                ⬅️ Kembali
+                            </button>
+                        </div>
+                    `;
                 }
-                
-                attempts++;
-                console.log(`🔄 Key ${key} sudah ada, generate ulang...`);
+            } catch (error) {
+                console.error('Error:', error);
+                trialArea.innerHTML = `
+                    <div class="notification error">
+                        <div class="notification-title">❌ Error</div>
+                        <div class="notification-message">Terjadi kesalahan. Silakan coba lagi.</div>
+                    </div>
+                    <button onclick="kembaliKeMenu()" class="btn" style="background: #6c757d;">⬅️ Kembali</button>
+                `;
             }
-            
-            // Fallback kalo mentok
-            console.warn('⚠️ Fallback: pake timestamp');
-            return 'VIP-' + Date.now().toString(36).toUpperCase().substring(0, 6);
         }
         
-        window.copyKey = function() {
-            const key = document.getElementById('keyDisplay').innerText;
-            if (key && !key.includes('Memproses') && !key.includes('Gagal')) {
-                navigator.clipboard.writeText(key).then(() => {
-                    const notification = document.getElementById('copyNotification');
-                    notification.classList.add('show');
-                    setTimeout(() => notification.classList.remove('show'), 2000);
-                });
+        window.generateTrialKey = async function(deviceId) {
+            const name = document.getElementById('trialName')?.value.trim();
+            let phone = document.getElementById('trialPhone')?.value.trim();
+            
+            if (!name || !phone) {
+                showNotification('warning', 'Data Tidak Lengkap', 'Nama dan nomor WhatsApp harus diisi!');
+                return;
             }
-        };
-        
-        // ================== FUNGSI FIREBASE ==================
-        
-        async function saveKeyToFirebase(key, invoice, phone) {
+            
+            if (phone.replace(/\D/g, '').length < 10) {
+                showNotification('warning', 'Nomor Tidak Valid', 'Nomor WhatsApp minimal 10 digit!');
+                return;
+            }
+            
+            const formattedPhone = formatPhoneNumber(phone);
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = true;
+            btn.textContent = 'Memproses...';
+            
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let key = 'TRIAL-';
+            for (let i = 0; i < 4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
+            key += '-';
+            for (let i = 0; i < 4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
+            
+            const expireDate = new Date();
+            expireDate.setDate(expireDate.getDate() + 3);
+            const expireStr = expireDate.toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric'
+            });
+            
             try {
                 await firebase.database().ref('Keys/' + key).set({
-                    ActivatedAt: 0,
-                    Devices: "null",
+                    Type: 'Duration',
+                    Value: '3d',
                     MaxDevices: 1,
-                    Type: "Duration",
-                    Value: "30d"
+                    ActivatedAt: Date.now(),
+                    Devices: null,
+                    source: 'trial',
+                    deviceId: deviceId,
+                    name: name,
+                    phone: formattedPhone
                 });
                 
-                console.log('✅ Key tersimpan di Keys/' + key);
-                
-                // Update transaksi (opsional)
-                await firebase.database().ref('transactions/' + invoice).update({
-                    generatedKey: key,
-                    keySentTo: phone
+                await firebase.database().ref('trial_history/' + deviceId).set({
+                    key: key,
+                    name: name,
+                    phone: formattedPhone,
+                    activatedAt: Date.now(),
+                    expiresAt: expireDate.getTime()
                 });
                 
-                return true;
-            } catch (error) {
-                console.error('❌ Gagal simpan key:', error);
-                return false;
-            }
-        }
-        
-        // ================== FUNGSI WHATSAPP ==================
-        
-        async function sendViaWhapi(phone, key, invoice, amount) {
-            const statusDiv = document.getElementById('waStatus');
-            statusDiv.style.display = 'block';
-            statusDiv.innerHTML = '📤 Mengirimkan key VIP via WhatsApp...';
-            
-            if (!phone || phone.length < 10) {
-                statusDiv.className = 'status-message status-error';
-                statusDiv.innerHTML = '❌ Nomor WhatsApp tidak valid. Key dapat disalin manual.';
-                return false;
-            }
-            
-            try {
-                const formattedPhone = formatPhoneApi(phone);
-                const formattedAmount = formatRupiah(amount);
-                const currentTime = getCurrentTime();
-                const expireDate = getExpireDate();
-                
-                const response = await fetch('https://gate.whapi.cloud/messages/text', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${WHAPI_TOKEN}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        to: formattedPhone,
-                        body: `✨ *PEMBAYARAN BERHASIL* ✨
+                try {
+                    await fetch('https://gate.whapi.cloud/messages/text', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${WHAPI_TOKEN}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            to: formattedPhone,
+                            body: `🎁 *KEY TRIAL PLUTOXTEAM 3 HARI* 🎁
 
-Yth. Pelanggan PlutoXTeam,
+Halo ${name},
 
-Terima kasih telah melakukan pembayaran. Berikut adalah detail transaksi dan key VIP Anda.
+Terima kasih telah mencoba Aplikasi PlutoXTeam.
 
-🔑 *KEY VIP ANDA*
+🔑 *KEY TRIAL ANDA*
 \`${key}\`
 
-📋 *DETAIL TRANSAKSI*
-• Total       : ${formattedAmount}
-• Waktu       : ${currentTime}
-• Masa Berlaku: 30 hari (hingga ${expireDate})
+📋 *DETAIL*
+• Masa berlaku: 3 hari
+• Berlaku hingga: ${expireStr}
+• Device ID: ${deviceId}
 
 📌 *CARA AKTIVASI*
 1. Buka aplikasi
 2. Masukkan key: ${key}
 3. Klik tombol Login
-4. Nikmati layanan premium
+4. Nikmati trial selama 3 hari
 
-📞 *BUTUH BANTUAN?*
-Hubungi admin kami
-WhatsApp: 0858-4929-9253
-
-Terima kasih atas kepercayaan Anda.
 Salam hangat,
-*Manajemen PlutoXTeam* 🚀`
-                    })
-                });
-                
-                if (response.ok) {
-                    statusDiv.className = 'status-message status-success';
-                    statusDiv.innerHTML = '✅ Key VIP berhasil dikirim ke WhatsApp!';
-                    document.getElementById('waLink').href = `https://wa.me/${formattedPhone}`;
-                    return true;
-                } else {
-                    throw new Error('Gagal mengirim');
+*PlutoXTeam* 🚀`
+                        })
+                    });
+                } catch (waError) {
+                    console.log('WA gagal');
                 }
                 
+                document.getElementById('trialArea').innerHTML = `
+                    <div class="success-box">
+                        <h3 style="color: #155724; margin-bottom: 15px;">✅ Key Trial Berhasil!</h3>
+                        
+                        <div style="background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; text-align: left;">
+                            <div><strong>Nama:</strong> ${name}</div>
+                            <div><strong>WA:</strong> ${formattedPhone}</div>
+                            <div><strong>Berlaku hingga:</strong> ${expireStr}</div>
+                        </div>
+                        
+                        <div class="key-display">${key}</div>
+                        
+                        <button onclick="copyKey('${key}')" class="btn btn-copy">📋 Copy Key</button>
+                        
+                        <p style="margin: 15px 0; color: #155724;">Key telah dikirim ke WhatsApp Anda.</p>
+                        
+                        <a href="${DOKU_LINK}" class="btn btn-premium" target="_blank">💳 Beli Premium (Rp 50.000)</a>
+                        
+                        <button onclick="kembaliKeMenu()" class="btn" style="background: #28a745; margin-top: 10px;">
+                            ✅ Selesai
+                        </button>
+                    </div>
+                `;
+                
             } catch (error) {
-                console.error('WA Error:', error);
-                statusDiv.className = 'status-message status-error';
-                statusDiv.innerHTML = '❌ Gagal mengirim ke WhatsApp. Key dapat disalin manual.';
-                return false;
+                console.error('Error:', error);
+                showNotification('error', 'Gagal', 'Gagal menyimpan key. Silakan coba lagi.');
+                btn.disabled = false;
+                btn.textContent = '🔑 Generate Key Trial';
             }
-        }
+        };
         
-        // ================== FUNGSI LAIN ==================
+        window.copyKey = function(key) {
+            navigator.clipboard.writeText(key).then(() => {
+                showNotification('success', 'Berhasil', 'Key berhasil disalin!');
+                setTimeout(() => {
+                    document.getElementById('notificationArea').innerHTML = '';
+                }, 3000);
+            });
+        };
         
-        window.contactAdmin = function() {
-            window.location.href = `https://wa.me/${ADMIN_PHONE}?text=Halo%20admin%20PlutoXTeam%2C%20saya%20butuh%20bantuan%20terkait%20key%20VIP%20saya`;
+        window.kembaliKeMenu = function() {
+            document.getElementById('mainMenu').classList.remove('hidden');
+            document.getElementById('trialArea').classList.add('hidden');
+            document.getElementById('trialArea').innerHTML = '';
+            document.getElementById('notificationArea').innerHTML = '';
         };
         
         window.handleLogoError = function() {
             document.getElementById('mainLogo').style.display = 'none';
             document.getElementById('logoFallback').style.display = 'block';
-        };
-        
-        // ================== MAIN FUNCTION ==================
-        
-        window.onload = async function() {
-            try {
-                document.getElementById('waStatus').style.display = 'block';
-                document.getElementById('waStatus').innerHTML = '⏳ Mengambil data transaksi...';
-                
-                // Ambil transaksi terbaru
-                const snapshot = await firebase.database().ref('transactions')
-                    .orderByChild('timestamp')
-                    .limitToLast(1)
-                    .once('value');
-                
-                const transactions = snapshot.val();
-                
-                if (!transactions) {
-                    throw new Error('Belum ada transaksi');
-                }
-                
-                const invoiceKeys = Object.keys(transactions);
-                const latestInvoice = invoiceKeys[invoiceKeys.length - 1];
-                const transaction = transactions[latestInvoice];
-                
-                // Bersihkan nomor
-                const phone = transaction.phone || '';
-                const cleanPhone = phone.replace(/\D/g, '');
-                
-                // Update tampilan
-                document.getElementById('invoice').textContent = latestInvoice;
-                document.getElementById('amount').textContent = formatRupiah(transaction.amount || 50000);
-                document.getElementById('time').textContent = getCurrentTime();
-                
-                const localPhone = formatPhoneLocal(cleanPhone);
-                document.getElementById('phoneDisplay').textContent = localPhone;
-                document.getElementById('phoneLink').textContent = localPhone;
-                
-                // ===== GENERATE KEY UNIK =====
-                const fullKey = await generateUniqueKey(); // "VIP-ABCDEF"
-                document.getElementById('keyDisplay').textContent = fullKey;
-                
-                // Simpan ke Firebase
-                await saveKeyToFirebase(fullKey, latestInvoice, cleanPhone);
-                
-                // Kirim WA
-                if (cleanPhone && cleanPhone.length >= 10) {
-                    await sendViaWhapi(cleanPhone, fullKey, latestInvoice, transaction.amount || 50000);
-                } else {
-                    document.getElementById('waStatus').className = 'status-message status-error';
-                    document.getElementById('waStatus').innerHTML = '❌ Nomor WA tidak valid. Hubungi admin.';
-                }
-                
-            } catch (error) {
-                console.error('❌ ERROR:', error);
-                document.getElementById('waStatus').className = 'status-message status-error';
-                document.getElementById('waStatus').innerHTML = '❌ Gagal memuat data. Hubungi admin.';
-                document.getElementById('keyDisplay').textContent = 'Gagal memuat key';
-            }
         };
     </script>
 </body>
