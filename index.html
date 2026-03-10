@@ -47,6 +47,17 @@
             }
         }
         
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
         .logo-container {
             margin-bottom: 20px;
         }
@@ -166,6 +177,11 @@
             transform: translateY(0);
         }
         
+        .btn-copy {
+            background: #6c757d;
+            margin: 10px 0;
+        }
+        
         .footer {
             margin-top: 24px;
             color: #999;
@@ -178,39 +194,46 @@
             color: #667eea;
         }
         
-        /* NOTIFIKASI */
+        /* NOTIFIKASI (tetap ada buat error/success) */
         .notification {
-            background: #d1ecf1;
-            border-left: 4px solid #17a2b8;
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 24px;
             text-align: left;
             animation: slideIn 0.3s ease;
+            border-left-width: 4px;
+            border-left-style: solid;
         }
         
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .notification.warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        
+        .notification.error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        
+        .notification.success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        
+        .notification.info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
         }
         
         .notification-title {
             font-weight: 700;
-            color: #0c5460;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
         
         .notification-message {
-            color: #0c5460;
             font-size: 14px;
             margin-left: 28px;
         }
@@ -299,10 +322,10 @@
             </div>
         </div>
         
-        <!-- NOTIFIKASI AREA (akan tampil jika perlu) -->
+        <!-- NOTIFIKASI AREA (untuk error/success) -->
         <div id="notificationArea"></div>
         
-        <!-- MENU UTAMA (default) -->
+        <!-- MENU UTAMA -->
         <div id="mainMenu">
             <h1>Pilih Opsi Aktivasi</h1>
             <div class="subtitle">Dapatkan akses premium ke PlutoXTeam</div>
@@ -331,12 +354,12 @@
                 </div>
             </div>
             
-            <!-- TOMBOL BELI PREMIUM (LANGSUNG KE DOKU) -->
+            <!-- TOMBOL BELI PREMIUM -->
             <a href="https://sandbox.doku.com/p-link/..." class="btn btn-premium" target="_blank">
                 💳 Beli Key Premium (Rp 50.000)
             </a>
             
-            <!-- TOMBOL TRIAL (CEK DEVICE ID DULU) -->
+            <!-- TOMBOL TRIAL -->
             <button onclick="handleTrialClick()" class="btn btn-trial" id="trialButton">
                 🎁 Coba Gratis 3 Hari
             </button>
@@ -351,7 +374,7 @@
             </div>
         </div>
         
-        <!-- AREA TRIAL (akan tampil jika device_id ada) -->
+        <!-- AREA TRIAL (hidden awalnya) -->
         <div id="trialArea" class="hidden"></div>
     </div>
     
@@ -381,7 +404,7 @@
         }
         
         /**
-         * Tampilkan notifikasi keren
+         * Tampilkan notifikasi (error/success aja)
          */
         function showNotification(type, title, message) {
             const area = document.getElementById('notificationArea');
@@ -407,7 +430,6 @@
          * Handle klik tombol trial
          */
         function handleTrialClick() {
-            // Ambil device_id dari URL
             const params = new URLSearchParams(window.location.search);
             const deviceId = params.get('device_id');
             
@@ -417,28 +439,25 @@
                 return;
             }
             
-            // Lanjut ke proses trial
+            // Lanjut proses trial
             prosesTrial(deviceId);
         }
         
         /**
-         * Proses trial (cek history, tampilkan form)
+         * Proses trial
          */
         async function prosesTrial(deviceId) {
             const mainMenu = document.getElementById('mainMenu');
             const trialArea = document.getElementById('trialArea');
             
-            // Sembunyikan menu utama, tampilkan loading
             mainMenu.classList.add('hidden');
             trialArea.classList.remove('hidden');
             trialArea.innerHTML = '<div style="text-align: center; padding: 20px;">⏳ Memeriksa status device...</div>';
             
             try {
-                // Cek apakah device sudah pernah trial
                 const snapshot = await firebase.database().ref('trial_history/' + deviceId).once('value');
                 
                 if (snapshot.exists()) {
-                    // Sudah pernah trial
                     trialArea.innerHTML = `
                         <div class="notification error" style="margin-top: 0;">
                             <div class="notification-title">❌ Trial Gagal</div>
@@ -450,7 +469,6 @@
                         <button onclick="kembaliKeMenu()" class="btn" style="background: #6c757d;">⬅️ Kembali</button>
                     `;
                 } else {
-                    // Belum pernah trial, tampilkan form
                     trialArea.innerHTML = `
                         <h2 style="margin-bottom: 20px;">Coba Gratis 3 Hari</h2>
                         <div class="trial-form">
@@ -501,7 +519,6 @@
                 return;
             }
             
-            // Validasi nomor minimal 10 digit
             if (phone.replace(/\D/g, '').length < 10) {
                 showNotification('warning', 'Nomor Tidak Valid', 'Nomor WhatsApp minimal 10 digit!');
                 return;
@@ -512,7 +529,7 @@
             btn.disabled = true;
             btn.textContent = 'Memproses...';
             
-            // Generate key trial (format: TRIAL-XXXX-XXXX)
+            // Generate key trial
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let key = 'TRIAL-';
             for (let i = 0; i < 4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -526,7 +543,6 @@
             });
             
             try {
-                // Simpan key di Keys
                 await firebase.database().ref('Keys/' + key).set({
                     Type: 'Duration',
                     Value: '3d',
@@ -539,7 +555,6 @@
                     phone: formattedPhone
                 });
                 
-                // Simpan ke trial_history
                 await firebase.database().ref('trial_history/' + deviceId).set({
                     key: key,
                     name: name,
@@ -548,7 +563,7 @@
                     expiresAt: expireDate.getTime()
                 });
                 
-                // Kirim via WA
+                // Kirim WA
                 try {
                     await fetch('https://gate.whapi.cloud/messages/text', {
                         method: 'POST',
@@ -578,13 +593,12 @@ Terima kasih telah mencoba PlutoXTeam.
 3. Klik tombol Login
 4. Nikmati trial selama 3 hari
 
-Setelah habis, Anda bisa membeli key premium untuk akses penuh.
-
+Salam hangat,
 *PlutoXTeam* 🚀`
                         })
                     });
                 } catch (waError) {
-                    console.log('WA gagal, tapi key tersimpan');
+                    console.log('WA gagal');
                 }
                 
                 // Tampilkan hasil
@@ -596,7 +610,6 @@ Setelah habis, Anda bisa membeli key premium untuk akses penuh.
                             <div><strong>Nama:</strong> ${name}</div>
                             <div><strong>WA:</strong> ${formattedPhone}</div>
                             <div><strong>Berlaku hingga:</strong> ${expireStr}</div>
-                            <div><strong>Device ID:</strong> ${deviceId}</div>
                         </div>
                         
                         <div class="key-display">${key}</div>
@@ -621,27 +634,15 @@ Setelah habis, Anda bisa membeli key premium untuk akses penuh.
             }
         };
         
-        /**
-         * Copy key ke clipboard
-         */
         window.copyKey = function(key) {
             navigator.clipboard.writeText(key).then(() => {
-                const notif = document.getElementById('notificationArea');
-                notif.innerHTML = `
-                    <div class="notification success">
-                        <div class="notification-title">✅ Berhasil</div>
-                        <div class="notification-message">Key berhasil disalin!</div>
-                    </div>
-                `;
+                showNotification('success', 'Berhasil', 'Key berhasil disalin!');
                 setTimeout(() => {
-                    notif.innerHTML = '';
+                    document.getElementById('notificationArea').innerHTML = '';
                 }, 3000);
             });
         };
         
-        /**
-         * Kembali ke menu utama
-         */
         window.kembaliKeMenu = function() {
             document.getElementById('mainMenu').classList.remove('hidden');
             document.getElementById('trialArea').classList.add('hidden');
@@ -649,27 +650,10 @@ Setelah habis, Anda bisa membeli key premium untuk akses penuh.
             document.getElementById('notificationArea').innerHTML = '';
         };
         
-        /**
-         * Handle logo error
-         */
         window.handleLogoError = function() {
             document.getElementById('mainLogo').style.display = 'none';
             document.getElementById('logoFallback').style.display = 'block';
         };
-        
-        /**
-         * Cek parameter di URL saat halaman dimuat
-         */
-        (function checkUrlParams() {
-            const params = new URLSearchParams(window.location.search);
-            const deviceId = params.get('device_id');
-            
-            // Jika ada device_id, tampilkan notifikasi (tapi jangan langsung proses)
-            if (deviceId) {
-                showNotification('info', 'Device ID Terdeteksi', 
-                    'Klik tombol "Coba Gratis 3 Hari" untuk memulai trial dengan device ini.');
-            }
-        })();
     </script>
 </body>
 </html>
