@@ -168,6 +168,11 @@
             background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
         }
         
+        /* TOMBOL DOWNLOAD BARU */
+        .btn-download {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        }
+        
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
@@ -194,7 +199,7 @@
             color: #667eea;
         }
         
-        /* NOTIFIKASI (tetap ada buat error/success) */
+        /* NOTIFIKASI */
         .notification {
             border-radius: 12px;
             padding: 16px;
@@ -322,7 +327,7 @@
             </div>
         </div>
         
-        <!-- NOTIFIKASI AREA (untuk error/success) -->
+        <!-- NOTIFIKASI AREA -->
         <div id="notificationArea"></div>
         
         <!-- MENU UTAMA -->
@@ -364,6 +369,11 @@
                 🎁 Coba Gratis 3 Hari
             </button>
             
+            <!-- TOMBOL UNDUH APK (BARU!) -->
+            <a href="download.html" class="btn btn-download">
+                📱 Unduh Aplikasi
+            </a>
+            
             <!-- TOMBOL ADMIN -->
             <a href="https://wa.me/6285849299253?text=Halo%20admin%20PlutoXTeam%2C%20saya%20ingin%20bertanya" class="btn btn-admin" target="_blank">
                 📞 Hubungi Admin (085849299253)
@@ -374,7 +384,7 @@
             </div>
         </div>
         
-        <!-- AREA TRIAL (hidden awalnya) -->
+        <!-- AREA TRIAL -->
         <div id="trialArea" class="hidden"></div>
     </div>
     
@@ -389,9 +399,6 @@
         const WHAPI_TOKEN = 'dUtoaA65nf39YiR4oJweRlGP5fCPZXek';
         const DOKU_LINK = 'https://sandbox.doku.com/p-link/...'; // Ganti dengan link DOKU asli
         
-        /**
-         * Format nomor WA ke format internasional
-         */
         function formatPhoneNumber(phone) {
             let cleaned = phone.replace(/\D/g, '');
             if (cleaned.startsWith('0')) {
@@ -403,9 +410,6 @@
             return cleaned;
         }
         
-        /**
-         * Tampilkan notifikasi (error/success aja)
-         */
         function showNotification(type, title, message) {
             const area = document.getElementById('notificationArea');
             const icons = {
@@ -426,9 +430,6 @@
             `;
         }
         
-        /**
-         * Handle klik tombol trial
-         */
         function handleTrialClick() {
             const params = new URLSearchParams(window.location.search);
             const deviceId = params.get('device_id');
@@ -439,13 +440,9 @@
                 return;
             }
             
-            // Lanjut proses trial
             prosesTrial(deviceId);
         }
         
-        /**
-         * Proses trial
-         */
         async function prosesTrial(deviceId) {
             const mainMenu = document.getElementById('mainMenu');
             const trialArea = document.getElementById('trialArea');
@@ -507,9 +504,6 @@
             }
         }
         
-        /**
-         * Generate key trial
-         */
         window.generateTrialKey = async function(deviceId) {
             const name = document.getElementById('trialName')?.value.trim();
             let phone = document.getElementById('trialPhone')?.value.trim();
@@ -529,7 +523,6 @@
             btn.disabled = true;
             btn.textContent = 'Memproses...';
             
-            // Generate key trial
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let key = 'TRIAL-';
             for (let i = 0; i < 4; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -563,7 +556,6 @@
                     expiresAt: expireDate.getTime()
                 });
                 
-                // Kirim WA
                 try {
                     await fetch('https://gate.whapi.cloud/messages/text', {
                         method: 'POST',
@@ -577,7 +569,7 @@
 
 Halo ${name},
 
-Terima kasih telah mencoba PlutoXTeam.
+Terima kasih telah mencoba Aplikasi PlutoXTeam.
 
 🔑 *KEY TRIAL ANDA*
 \`${key}\`
@@ -601,7 +593,6 @@ Salam hangat,
                     console.log('WA gagal');
                 }
                 
-                // Tampilkan hasil
                 document.getElementById('trialArea').innerHTML = `
                     <div class="success-box">
                         <h3 style="color: #155724; margin-bottom: 15px;">✅ Key Trial Berhasil!</h3>
