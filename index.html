@@ -168,7 +168,6 @@
             background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
         }
         
-        /* TOMBOL DOWNLOAD BARU */
         .btn-download {
             background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
         }
@@ -199,7 +198,6 @@
             color: #667eea;
         }
         
-        /* NOTIFIKASI */
         .notification {
             border-radius: 12px;
             padding: 16px;
@@ -243,7 +241,6 @@
             margin-left: 28px;
         }
         
-        /* FORM TRIAL */
         .trial-form {
             background: #f0f7ff;
             border-radius: 16px;
@@ -369,7 +366,7 @@
                 🎁 Coba Gratis 3 Hari
             </button>
             
-            <!-- TOMBOL UNDUH APK (BARU!) -->
+            <!-- TOMBOL UNDUH APK -->
             <a href="download.html" class="btn btn-download">
                 📱 Unduh Aplikasi
             </a>
@@ -396,8 +393,7 @@
         firebase.initializeApp(firebaseConfig);
         
         const ADMIN_PHONE = '6285849299253';
-        const WHAPI_TOKEN = 'dUtoaA65nf39YiR4oJweRlGP5fCPZXek';
-        const DOKU_LINK = 'https://pay.doku.com/p-link/p/sidian'; // Ganti dengan link DOKU asli
+        const DOKU_LINK = 'https://pay.doku.com/p-link/p/sidian';
         
         function formatPhoneNumber(phone) {
             let cleaned = phone.replace(/\D/g, '');
@@ -556,43 +552,6 @@
                     expiresAt: expireDate.getTime()
                 });
                 
-                try {
-                    await fetch('https://gate.whapi.cloud/messages/text', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${WHAPI_TOKEN}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            to: formattedPhone,
-                            body: `🎁 *KEY TRIAL PLUTOXTEAM 3 HARI* 🎁
-
-Halo ${name},
-
-Terima kasih telah mencoba Aplikasi PlutoXTeam.
-
-🔑 *KEY TRIAL ANDA*
-\`${key}\`
-
-📋 *DETAIL*
-• Masa berlaku: 3 hari
-• Berlaku hingga: ${expireStr}
-• Device ID: ${deviceId}
-
-📌 *CARA AKTIVASI*
-1. Buka aplikasi
-2. Masukkan key: ${key}
-3. Klik tombol Login
-4. Nikmati trial selama 3 hari
-
-Salam hangat,
-*PlutoXTeam* 🚀`
-                        })
-                    });
-                } catch (waError) {
-                    console.log('WA gagal');
-                }
-                
                 document.getElementById('trialArea').innerHTML = `
                     <div class="success-box">
                         <h3 style="color: #155724; margin-bottom: 15px;">✅ Key Trial Berhasil!</h3>
@@ -607,7 +566,7 @@ Salam hangat,
                         
                         <button onclick="copyKey('${key}')" class="btn btn-copy">📋 Copy Key</button>
                         
-                        <p style="margin: 15px 0; color: #155724;">Key telah dikirim ke WhatsApp Anda.</p>
+                        <p style="margin: 15px 0; color: #155724;">Silakan simpan key ini untuk aktivasi trial Anda.</p>
                         
                         <a href="${DOKU_LINK}" class="btn btn-premium" target="_blank">💳 Beli Premium (Rp 50.000)</a>
                         
