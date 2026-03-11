@@ -241,10 +241,6 @@
             background: #667eea;
             margin-top: 15px;
         }
-
-        .btn-payment {
-            background: #f0933b;
-        }
         
         .footer {
             margin-top: 24px;
@@ -366,13 +362,13 @@
             </a>
         </div>
 
-        <!-- AREA PENDING/MENUNGGU - SUDAH DIPERBAIKI -->
+        <!-- AREA PENDING/MENUNGGU (BERSIH) -->
         <div id="pendingArea" class="warning-box">
             <h3>⏳ Menunggu Pembayaran</h3>
             <p>Anda kembali ke merchant sebelum menyelesaikan pembayaran.</p>
             <p>Silakan selesaikan pembayaran Anda di halaman DOKU.</p>
             <p style="margin-top: 15px; font-size: 13px;">Jika sudah membayar, tunggu beberapa saat hingga notifikasi masuk.</p>
-            <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-payment" style="margin-top: 15px;">
+            <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-payment" style="background: #f0933b; margin-top: 15px;">
                 💳 Kembali ke Halaman Pembayaran
             </a>
             <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 10px;">
@@ -559,6 +555,7 @@ Terima kasih telah melakukan pembayaran. Berikut adalah detail transaksi dan key
 • Total       : ${formattedAmount}
 • Waktu       : ${currentTime}
 • Masa Berlaku: 30 hari (hingga ${expireDate})
+• Invoice     : ${invoice}
 
 📌 *CARA AKTIVASI*
 1. Buka aplikasi
@@ -580,6 +577,12 @@ Salam hangat,
                     statusDiv.className = 'status-message status-success';
                     statusDiv.innerHTML = '✅ Key VIP berhasil dikirim ke WhatsApp!';
                     document.getElementById('waLink').href = `https://wa.me/${formattedPhone}`;
+                    
+                    // Update flag wa_sent di Firebase (opsional)
+                    try {
+                        await firebase.database().ref('transactions/' + invoice).update({ wa_sent: true });
+                    } catch (e) {}
+                    
                     return true;
                 } else {
                     throw new Error('Gagal mengirim');
@@ -604,93 +607,121 @@ Salam hangat,
             document.getElementById('logoFallback').style.display = 'block';
         };
         
-        // ================== MAIN FUNCTION (FIXED - TANPA INVOICE DI PENDING) ==================
+        // ================== MAIN FUNCTION (FIXED - PAKAI SESSIONSTORAGE) ==================
         
         window.onload = async function() {
             try {
-                // ========== AMBIL DATA DARI SESSION STORAGE ==========
-                const sessionPhone = sessionStorage.getItem('customer_phone') || '';
-                const sessionInvoice = sessionStorage.getItem('customer_invoice') || '';
+                // 🔒 PENGAMAN 1: AMBIL INVOICE DARI SESSIONSTORAGE
+                const sessionInvoice = sessionStorage.getItem('customer_invoice');
                 
-                // ========== AMBIL DARI URL (kalo ada) ==========
-                const urlParams = new URLSearchParams(window.location.search);
-                
-                // Invoice dari URL (kalo ada)
-                const urlInvoice = urlParams.get('invoice') || 
-                                  urlParams.get('reference_id') || 
-                                  urlParams.get('order_number') || 
-                                  '';
-                
-                // Status dari URL
-                const paymentStatus = urlParams.get('payment_status') || '0';
-                
-                // ========== GABUNGKAN DATA ==========
-                const invoice = urlInvoice || sessionInvoice; // JANGAN GENERATE SENDIRI
-                const phone = sessionPhone;
-                
-                // DETEKSI SUKSES: ADA PARAMETER DI URL ATAU PAYMENT_STATUS=1
-                const hasParams = urlParams.toString() !== '';
-                const isSuccess = hasParams || paymentStatus === '1';
-                
-                console.log('📦 DATA:', { 
-                    invoice, 
-                    phone, 
-                    hasParams,
-                    paymentStatus,
-                    isSuccess
-                });
-                
-                // ========== PENGAMAN ==========
-                if (!isSuccess) {
-                    // Tampilkan area pending (TANPA INVOICE)
+                // Jika tidak ada invoice di sessionStorage, tampilkan pending
+                if (!sessionInvoice) {
+                    console.log('⛔ Tidak ada sesi pembayaran');
                     document.getElementById('pendingArea').style.display = 'block';
                     document.getElementById('successArea').classList.add('hidden');
-                    
-                    // Gak usah tampilin invoice apa pun
-                    // Cuma teks "Menunggu Pembayaran" doang
                     return;
                 }
                 
-                // ========== JIKA SUKSES ==========
-                // Sembunyikan pending, tampilkan success
-                document.getElementById('pendingArea').style.display = 'none';
-                document.getElementById('successArea').classList.remove('hidden');
+                console.log('🔍 Memeriksa invoice dari session:', sessionInvoice);
                 
-                // Update tampilan
-                document.getElementById('amount').textContent = formatRupiah(AMOUNT_FIXED);
-                document.getElementById('time').textContent = getCurrentTime();
-                document.getElementById('invoiceDisplay').textContent = invoice || 'Tidak ada';
+                // 🔒 PENGAMAN 2: CEK DATA TRANSAKSI DI FIREBASE
+                const txRef = firebase.database().ref('transactions/' + sessionInvoice);
+                const snapshot = await txRef.once('value');
+                const txData = snapshot.val();
                 
-                const cleanPhone = phone ? phone.replace(/\D/g, '') : '';
-                const localPhone = formatPhoneLocal(cleanPhone);
-                document.getElementById('phoneDisplay').textContent = localPhone || 'Tidak tersedia';
-                document.getElementById('phoneLink').textContent = localPhone || 'Tidak tersedia';
-                
-                // Tampilkan status loading
-                document.getElementById('waStatus').style.display = 'block';
-                document.getElementById('waStatus').className = 'status-message';
-                document.getElementById('waStatus').innerHTML = '⏳ Membuat key VIP...';
-                
-                // Generate key unik
-                const fullKey = await generateUniqueKey();
-                document.getElementById('keyDisplay').textContent = fullKey;
-                
-                // Simpan key ke Firebase
-                if (invoice) {
-                    await saveKeyToFirebase(fullKey, invoice, cleanPhone);
+                // Jika data belum ada di Firebase (webhook belum diproses)
+                if (!txData) {
+                    console.log('⏳ Data transaksi belum masuk, tampilkan pending');
+                    document.getElementById('pendingArea').style.display = 'block';
+                    document.getElementById('successArea').classList.add('hidden');
+                    
+                    // Auto refresh setiap 5 detik
+                    setTimeout(() => window.location.reload(), 5000);
+                    return;
                 }
                 
-                // Kirim WA jika nomor tersedia
-                if (cleanPhone && cleanPhone.length >= 10) {
-                    await sendViaWhapi(cleanPhone, fullKey, invoice || 'INV-' + Date.now());
+                // Jika status SUCCESS
+                if (txData.status === 'SUCCESS') {
+                    console.log('✅ Transaksi SUCCESS, tampilkan key');
+                    
+                    // Sembunyikan pending, tampilkan success
+                    document.getElementById('pendingArea').style.display = 'none';
+                    document.getElementById('successArea').classList.remove('hidden');
+                    
+                    // Update tampilan dengan data dari Firebase
+                    document.getElementById('amount').textContent = formatRupiah(txData.amount || AMOUNT_FIXED);
+                    document.getElementById('time').textContent = getCurrentTime();
+                    document.getElementById('invoiceDisplay').textContent = sessionInvoice;
+                    
+                    // Ambil nomor WA dari Firebase atau sessionStorage (cadangan)
+                    const phone = txData.phone || sessionStorage.getItem('customer_phone') || '';
+                    const cleanPhone = phone.replace(/\D/g, '');
+                    const localPhone = formatPhoneLocal(cleanPhone);
+                    document.getElementById('phoneDisplay').textContent = localPhone || 'Tidak tersedia';
+                    document.getElementById('phoneLink').textContent = localPhone || 'Tidak tersedia';
+                    
+                    // CEK APAKAH KEY SUDAH PERNAH DIGENERATE
+                    // Cari key berdasarkan invoice di node Keys
+                    const keysRef = firebase.database().ref('Keys');
+                    const keysSnapshot = await keysRef.orderByChild('generated_for').equalTo(sessionInvoice).once('value');
+                    const keysData = keysSnapshot.val();
+                    
+                    let fullKey;
+                    
+                    if (keysData) {
+                        // Key sudah ada, ambil key pertama
+                        fullKey = Object.keys(keysData)[0];
+                        console.log('🔑 Key sudah ada:', fullKey);
+                        document.getElementById('keyDisplay').textContent = fullKey;
+                        
+                        // Cek apakah WA sudah dikirim
+                        if (txData.wa_sent) {
+                            document.getElementById('waStatus').className = 'status-message status-success';
+                            document.getElementById('waStatus').innerHTML = '✅ Key sudah dikirim ke WhatsApp sebelumnya.';
+                            document.getElementById('waStatus').style.display = 'block';
+                        }
+                    } else {
+                        // Key belum ada, generate baru
+                        document.getElementById('waStatus').style.display = 'block';
+                        document.getElementById('waStatus').className = 'status-message';
+                        document.getElementById('waStatus').innerHTML = '⏳ Membuat key VIP...';
+                        
+                        fullKey = await generateUniqueKey();
+                        document.getElementById('keyDisplay').textContent = fullKey;
+                        
+                        // Simpan key ke Firebase
+                        await saveKeyToFirebase(fullKey, sessionInvoice, cleanPhone);
+                        
+                        // Kirim WA jika nomor tersedia
+                        if (cleanPhone && cleanPhone.length >= 10) {
+                            await sendViaWhapi(cleanPhone, fullKey, sessionInvoice);
+                        } else {
+                            document.getElementById('waStatus').className = 'status-message status-warning';
+                            document.getElementById('waStatus').innerHTML = '⚠️ Nomor WA tidak tersedia. Key dapat disalin manual.';
+                        }
+                    }
+                    
+                    // 🔒 PENGAMAN 3: HAPUS SESSIONSTORAGE SETELAH SUKSES
+                    sessionStorage.removeItem('customer_invoice');
+                    sessionStorage.removeItem('customer_phone');
+                    
+                } else if (txData.status === 'PENDING') {
+                    // Masih pending
+                    document.getElementById('pendingArea').style.display = 'block';
+                    document.getElementById('successArea').classList.add('hidden');
+                    setTimeout(() => window.location.reload(), 5000);
                 } else {
-                    document.getElementById('waStatus').className = 'status-message status-warning';
-                    document.getElementById('waStatus').innerHTML = '⚠️ Nomor WA tidak tersedia. Key dapat disalin manual.';
+                    // Status lain (FAILED, EXPIRED, dll)
+                    document.getElementById('pendingArea').style.display = 'block';
+                    document.getElementById('successArea').classList.add('hidden');
+                    document.getElementById('pendingArea').innerHTML = `
+                        <h3>❌ Pembayaran ${txData.status}</h3>
+                        <p>Status transaksi: ${txData.status}. Silakan hubungi admin jika perlu.</p>
+                        <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 15px;">
+                            🏠 Kembali ke Menu Utama
+                        </a>
+                    `;
                 }
-                
-                // HAPUS SESSION STORAGE setelah dipakai
-                sessionStorage.removeItem('customer_phone');
-                sessionStorage.removeItem('customer_invoice');
                 
             } catch (error) {
                 console.error('❌ ERROR:', error);
@@ -698,6 +729,15 @@ Salam hangat,
                 // Tampilkan error di area pending
                 document.getElementById('pendingArea').style.display = 'block';
                 document.getElementById('successArea').classList.add('hidden');
+                
+                document.getElementById('pendingArea').innerHTML = `
+                    <h3>❌ Terjadi Kesalahan</h3>
+                    <p>${error.message}</p>
+                    <p>Silakan hubungi admin jika masalah berlanjut.</p>
+                    <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 15px;">
+                        🏠 Kembali ke Menu Utama
+                    </a>
+                `;
             }
         };
     </script>
