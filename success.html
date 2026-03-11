@@ -349,7 +349,9 @@
                 <div class="key-display" id="keyDisplay">-</div>
             </div>
             
-            <button onclick="copyKey()" class="btn btn-copy" id="copyBtn">📋 Salin Key</button>   
+            <button onclick="copyKey()" class="btn btn-copy" id="copyBtn">📋 Salin Key</button>
+            
+            <!-- WHATSAPP SECTION TELAH DIHAPUS (SESUAI PERMINTAAN) -->
             
             <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home">
                 🏠 Kembali ke Menu Utama
@@ -512,8 +514,11 @@
         window.onload = async function() {
             try {
                 // Tampilkan pending dulu dengan animasi
-                document.getElementById('pendingArea').style.display = 'block';
-                document.getElementById('successArea').classList.add('hidden');
+                const pendingArea = document.getElementById('pendingArea');
+                const successArea = document.getElementById('successArea');
+                
+                if (pendingArea) pendingArea.style.display = 'block';
+                if (successArea) successArea.classList.add('hidden');
                 
                 // Ambil 5 transaksi terbaru dari Firebase
                 const snapshot = await firebase.database().ref('transactions')
@@ -525,17 +530,19 @@
                 
                 if (!transactions) {
                     // Tidak ada transaksi sama sekali
-                    document.getElementById('pendingArea').innerHTML = `
-                        <h3>⏳ Menunggu Pembayaran</h3>
-                        <p>Belum ada transaksi yang ditemukan.</p>
-                        <p>Silakan lakukan pembayaran terlebih dahulu.</p>
-                        <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-payment" style="margin-top: 15px;">
-                            💳 Kembali ke Halaman Pembayaran
-                        </a>
-                        <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 10px;">
-                            🏠 Kembali ke Menu Utama
-                        </a>
-                    `;
+                    if (pendingArea) {
+                        pendingArea.innerHTML = `
+                            <h3>⏳ Menunggu Pembayaran</h3>
+                            <p>Belum ada transaksi yang ditemukan.</p>
+                            <p>Silakan lakukan pembayaran terlebih dahulu.</p>
+                            <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-payment" style="margin-top: 15px;">
+                                💳 Kembali ke Halaman Pembayaran
+                            </a>
+                            <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 10px;">
+                                🏠 Kembali ke Menu Utama
+                            </a>
+                        `;
+                    }
                     return;
                 }
                 
@@ -562,39 +569,43 @@
                 // CEK APAKAH TRANSAKSI DALAM 2 MENIT TERAKHIR
                 if (latestTx.timestamp < twoMinutesAgo) {
                     // Transaksi terlalu lama
-                    document.getElementById('pendingArea').innerHTML = `
-                        <div class="loader"></div>
-                        <h3>⏳ Menunggu Pembayaran</h3>
-                        <p>Tidak ada transaksi baru dalam 2 menit terakhir.</p>
-                        <p>Silakan lakukan pembayaran terlebih dahulu.</p>
-                        <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-payment" style="margin-top: 15px;">
-                            💳 Kembali ke Halaman Pembayaran
-                        </a>
-                        <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 10px;">
-                            🏠 Kembali ke Menu Utama
-                        </a>
-                    `;
+                    if (pendingArea) {
+                        pendingArea.innerHTML = `
+                            <div class="loader"></div>
+                            <h3>⏳ Menunggu Pembayaran</h3>
+                            <p>Tidak ada transaksi baru dalam 2 menit terakhir.</p>
+                            <p>Silakan lakukan pembayaran terlebih dahulu.</p>
+                            <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-payment" style="margin-top: 15px;">
+                                💳 Kembali ke Halaman Pembayaran
+                            </a>
+                            <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 10px;">
+                                🏠 Kembali ke Menu Utama
+                            </a>
+                        `;
+                    }
                     return;
                 }
                 
                 // CEK STATUS
                 if (latestTx.status !== 'SUCCESS') {
                     // Masih pending, auto refresh 3 detik dengan animasi
-                    document.getElementById('pendingArea').innerHTML = `
-                        <div class="loader"></div>
-                        <h3>⏳ Sedang Memproses Pembayaran</h3>
-                        <p style="font-size: 15px; margin: 10px 0;">Mohon tunggu sebentar, sistem sedang mengkonfirmasi pembayaran Anda.</p>
-                        <p style="font-size: 14px; color: #856404;">Proses ini biasanya memakan waktu 10-30 detik.</p>
-                        <p><strong>Invoice:</strong> ${latestTx.invoice}</p>
-                        <p><strong>Status:</strong> ${latestTx.status}</p>
-                        <p>Halaman akan diperbarui otomatis dalam 3 detik.</p>
-                        <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-payment" style="margin-top: 15px;">
-                            💳 Kembali ke Halaman Pembayaran
-                        </a>
-                        <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 10px;">
-                            🏠 Kembali ke Menu Utama
-                        </a>
-                    `;
+                    if (pendingArea) {
+                        pendingArea.innerHTML = `
+                            <div class="loader"></div>
+                            <h3>⏳ Sedang Memproses Pembayaran</h3>
+                            <p style="font-size: 15px; margin: 10px 0;">Mohon tunggu sebentar, sistem sedang mengkonfirmasi pembayaran Anda.</p>
+                            <p style="font-size: 14px; color: #856404;">Proses ini biasanya memakan waktu 10-30 detik.</p>
+                            <p><strong>Invoice:</strong> ${latestTx.invoice}</p>
+                            <p><strong>Status:</strong> ${latestTx.status}</p>
+                            <p>Halaman akan diperbarui otomatis dalam 3 detik.</p>
+                            <a href="https://sandbox.doku.com/p-link/p/HDLMKO9gb3" class="btn btn-payment" style="margin-top: 15px;">
+                                💳 Kembali ke Halaman Pembayaran
+                            </a>
+                            <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 10px;">
+                                🏠 Kembali ke Menu Utama
+                            </a>
+                        `;
+                    }
                     
                     setTimeout(() => window.location.reload(), 3000);
                     return;
@@ -604,18 +615,24 @@
                 console.log('✅ Transaksi sukses dalam 2 menit:', latestTx);
                 
                 // Sembunyikan pending, tampilkan success
-                document.getElementById('pendingArea').style.display = 'none';
-                document.getElementById('successArea').classList.remove('hidden');
+                if (pendingArea) pendingArea.style.display = 'none';
+                if (successArea) successArea.classList.remove('hidden');
                 
-                // Update tampilan dengan data dari Firebase
-                document.getElementById('amount').textContent = formatRupiah(latestTx.amount || AMOUNT_FIXED);
-                document.getElementById('time').textContent = getCurrentTime();
-                document.getElementById('invoiceDisplay').textContent = latestTx.invoice;
+                // Update tampilan dengan PENGECEKAN element
+                const amountEl = document.getElementById('amount');
+                if (amountEl) amountEl.textContent = formatRupiah(latestTx.amount || AMOUNT_FIXED);
+                
+                const timeEl = document.getElementById('time');
+                if (timeEl) timeEl.textContent = getCurrentTime();
+                
+                const invoiceEl = document.getElementById('invoiceDisplay');
+                if (invoiceEl) invoiceEl.textContent = latestTx.invoice;
                 
                 const cleanPhone = latestTx.phone ? latestTx.phone.replace(/\D/g, '') : '';
                 const localPhone = formatPhoneLocal(cleanPhone);
-                document.getElementById('phoneDisplay').textContent = localPhone || 'Tidak tersedia';
-                document.getElementById('phoneLink').textContent = localPhone || 'Tidak tersedia';
+                
+                const phoneEl = document.getElementById('phoneDisplay');
+                if (phoneEl) phoneEl.textContent = localPhone || 'Tidak tersedia';
                 
                 // CEK APAKAH KEY SUDAH ADA
                 const keysSnapshot = await firebase.database().ref('Keys')
@@ -626,15 +643,17 @@
                 const keysData = keysSnapshot.val();
                 let fullKey;
                 
+                const keyEl = document.getElementById('keyDisplay');
+                
                 if (keysData) {
                     // Key sudah ada, ambil key pertama
                     fullKey = Object.keys(keysData)[0];
                     console.log('🔑 Key sudah ada:', fullKey);
-                    document.getElementById('keyDisplay').textContent = fullKey;
+                    if (keyEl) keyEl.textContent = fullKey;
                 } else {
                     // Key belum ada, generate baru
                     fullKey = await generateUniqueKey();
-                    document.getElementById('keyDisplay').textContent = fullKey;
+                    if (keyEl) keyEl.textContent = fullKey;
                     
                     // Simpan key ke Firebase
                     await saveKeyToFirebase(fullKey, latestTx.invoice, cleanPhone);
@@ -644,14 +663,17 @@
                 console.error('❌ ERROR:', error);
                 
                 // Tampilkan error di area pending
-                document.getElementById('pendingArea').innerHTML = `
-                    <h3>❌ Terjadi Kesalahan</h3>
-                    <p>${error.message}</p>
-                    <p>Silakan hubungi admin jika masalah berlanjut.</p>
-                    <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 15px;">
-                        🏠 Kembali ke Menu Utama
-                    </a>
-                `;
+                const pendingArea = document.getElementById('pendingArea');
+                if (pendingArea) {
+                    pendingArea.innerHTML = `
+                        <h3>❌ Terjadi Kesalahan</h3>
+                        <p>${error.message}</p>
+                        <p>Silakan hubungi admin jika masalah berlanjut.</p>
+                        <a href="https://plutoxteam.github.io/Payment/" class="btn btn-home" style="margin-top: 15px;">
+                            🏠 Kembali ke Menu Utama
+                        </a>
+                    `;
+                }
             }
         };
     </script>
