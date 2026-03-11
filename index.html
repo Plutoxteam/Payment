@@ -498,7 +498,7 @@
             document.getElementById('notificationArea').innerHTML = '';
         };
         
-        // ================== FUNGSI LUPA KEY (FITUR BARU) ==================
+        // ================== FUNGSI LUPA KEY (FITUR BARU) - TELAH DIPERBAIKI ==================
         
         window.showLupaKeyForm = function() {
             const mainMenu = document.getElementById('mainMenu');
@@ -542,13 +542,42 @@
                 return;
             }
             
-            // Format nomor ke 62 format
-            let cleanPhone = phoneInput.replace(/\D/g, '');
-            if (cleanPhone.startsWith('0')) {
-                cleanPhone = '62' + cleanPhone.substring(1);
-            } else if (!cleanPhone.startsWith('62')) {
-                cleanPhone = '62' + cleanPhone;
+            // Bersihkan nomor dari karakter non-digit
+            const cleaned = phoneInput.replace(/\D/g, '');
+            
+            // Buat array berisi SEMUA KEMUNGKINAN FORMAT
+            const phoneVariants = [];
+            
+            // 1. Format asli (082254094106) - dengan 0
+            if (cleaned.startsWith('0')) {
+                phoneVariants.push(cleaned);
+            } else {
+                phoneVariants.push('0' + cleaned);
             }
+            
+            // 2. Format 62 (6282254094106)
+            if (cleaned.startsWith('0')) {
+                phoneVariants.push('62' + cleaned.substring(1));
+            } else if (cleaned.startsWith('62')) {
+                phoneVariants.push(cleaned);
+            } else {
+                phoneVariants.push('62' + cleaned);
+            }
+            
+            // 3. Format tanpa awalan (82254094106)
+            if (cleaned.startsWith('0')) {
+                phoneVariants.push(cleaned.substring(1));
+            } else if (cleaned.startsWith('62')) {
+                phoneVariants.push(cleaned.substring(2));
+            } else {
+                phoneVariants.push(cleaned);
+            }
+            
+            // Hapus kemungkinan duplikat
+            const uniqueVariants = [...new Set(phoneVariants)];
+            
+            console.log('🔍 Mencari nomor:', phoneInput);
+            console.log('🔍 Format dicoba:', uniqueVariants);
             
             const btn = document.getElementById('cekBtnLupa');
             btn.disabled = true;
@@ -558,16 +587,25 @@
             resultDiv.innerHTML = '<p style="text-align: center;">⏳ Memuat data...</p>';
             
             try {
-                // Cari semua key dengan nomor ini
-                const keysSnapshot = await firebase.database().ref('Keys')
-                    .orderByChild('customer_phone')
-                    .equalTo(cleanPhone)
-                    .once('value');
+                // Cari dengan SEMUA kemungkinan format
+                let allKeys = {};
                 
-                const keys = keysSnapshot.val();
+                for (const variant of uniqueVariants) {
+                    const snapshot = await firebase.database().ref('Keys')
+                        .orderByChild('customer_phone')
+                        .equalTo(variant)
+                        .once('value');
+                    
+                    const keys = snapshot.val();
+                    if (keys) {
+                        allKeys = {...allKeys, ...keys};
+                        console.log(`✅ Ditemukan ${Object.keys(keys).length} key dengan format ${variant}`);
+                    }
+                }
+                
                 const now = Date.now();
                 
-                if (!keys) {
+                if (Object.keys(allKeys).length === 0) {
                     resultDiv.innerHTML = `
                         <div class="notification warning" style="margin-top: 15px;">
                             <div class="notification-title">ℹ️ Tidak Ditemukan</div>
@@ -586,7 +624,7 @@
                 const activeKeys = [];
                 const expiredKeys = [];
                 
-                Object.entries(keys).forEach(([keyId, keyData]) => {
+                Object.entries(allKeys).forEach(([keyId, keyData]) => {
                     // Cek apakah key bertipe Duration (30 hari atau 3 hari)
                     if (keyData.Type === 'Duration') {
                         let duration = 30; // default 30 hari
@@ -605,10 +643,14 @@
                                 daysLeft,
                                 invoice: keyData.generated_for || 'Tidak diketahui',
                                 isTrial: (keyData.Value === '3d'),
-                                source: keyData.source || 'premium'
+                                source: keyData.source || 'premium',
+                                phone: keyData.customer_phone
                             });
                         } else {
-                            expiredKeys.push(keyId);
+                            expiredKeys.push({
+                                key: keyId,
+                                expiredAt
+                            });
                         }
                     }
                 });
@@ -617,26 +659,27 @@
                 activeKeys.sort((a, b) => b.activatedAt - a.activatedAt);
                 
                 if (activeKeys.length === 0) {
-                    resultDiv.innerHTML = `
+                    let html = `
                         <div class="notification warning" style="margin-top: 15px;">
                             <div class="notification-title">⏳ Tidak Ada Key Aktif</div>
                             <div class="notification-message">
-                                Tidak ditemukan key aktif untuk nomor ${phoneInput}.
-                                ${expiredKeys.length > 0 ? `<br>Ditemukan ${expiredKeys.length} key expired.` : ''}
+                                Ditemukan ${Object.keys(allKeys).length} key tapi semuanya expired.
                             </div>
                         </div>
                     `;
                     
                     if (expiredKeys.length > 0) {
-                        resultDiv.innerHTML += `
+                        html += `
                             <details style="margin-top: 15px;">
                                 <summary style="color: #999; cursor: pointer;">📁 Lihat ${expiredKeys.length} key expired</summary>
                                 <div class="expired-list">
-                                    ${expiredKeys.map(k => `<div>${k}</div>`).join('')}
+                                    ${expiredKeys.map(k => `<div>${k.key}</div>`).join('')}
                                 </div>
                             </details>
                         `;
                     }
+                    
+                    resultDiv.innerHTML = html;
                 } else {
                     // Tampilkan key aktif
                     let html = `
@@ -661,6 +704,7 @@
                                     <div>Berlaku hingga: ${endDate}</div>
                                     <div><strong>Sisa: ${k.daysLeft} hari</strong></div>
                                     <div>Invoice: ${k.invoice}</div>
+                                    <div>Nomor: ${k.phone}</div>
                                 </div>
                                 <button onclick="copyKey('${k.key}')" class="btn btn-copy" style="margin-top: 10px; padding: 8px; font-size: 14px;">
                                     📋 Copy Key
@@ -674,7 +718,7 @@
                             <details style="margin-top: 15px;">
                                 <summary style="color: #999; cursor: pointer;">📁 ${expiredKeys.length} Key Expired</summary>
                                 <div class="expired-list">
-                                    ${expiredKeys.map(k => `<div>${k}</div>`).join('')}
+                                    ${expiredKeys.map(k => `<div>${k.key}</div>`).join('')}
                                 </div>
                             </details>
                         `;
@@ -814,7 +858,8 @@
                     source: 'trial',
                     deviceId: deviceId,
                     name: name,
-                    phone: formattedPhone
+                    phone: formattedPhone,
+                    customer_phone: formattedPhone // Tambahkan field ini untuk konsistensi
                 });
                 
                 await firebase.database().ref('trial_history/' + deviceId).set({
@@ -824,8 +869,6 @@
                     activatedAt: Date.now(),
                     expiresAt: expireDate.getTime()
                 });
-                
-                // HAPUS KODE WA DI SINI (sesuai permintaan sebelumnya)
                 
                 document.getElementById('trialArea').innerHTML = `
                     <div class="success-box">
