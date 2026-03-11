@@ -172,6 +172,11 @@
             background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
         }
         
+        /* TOMBOL LUPA KEY - WARNA UNGU */
+        .btn-lupa-key {
+            background: linear-gradient(135deg, #6f42c1 0%, #6610f2 100%);
+        }
+        
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
@@ -313,6 +318,36 @@
         .hidden {
             display: none;
         }
+        
+        /* Style untuk hasil pencarian key */
+        .key-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: left;
+            border-left: 4px solid #28a745;
+        }
+        
+        .key-badge {
+            background: #f0933b;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+        
+        .expired-list {
+            font-size: 12px;
+            color: #999;
+            margin-top: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
@@ -371,6 +406,11 @@
                 📱 Unduh Aplikasi
             </a>
             
+            <!-- TOMBOL LUPA KEY (TAMBAHAN BARU) -->
+            <button onclick="showLupaKeyForm()" class="btn btn-lupa-key">
+                🔍 Lupa Key? Cek di sini
+            </button>
+            
             <!-- TOMBOL ADMIN -->
             <a href="https://wa.me/6285849299253?text=Halo%20admin%20PlutoXTeam%2C%20saya%20ingin%20bertanya" class="btn btn-admin" target="_blank">
                 📞 Hubungi Admin (085849299253)
@@ -381,7 +421,7 @@
             </div>
         </div>
         
-        <!-- AREA TRIAL -->
+        <!-- AREA TRIAL (juga dipakai untuk form lupa key) -->
         <div id="trialArea" class="hidden"></div>
     </div>
     
@@ -393,7 +433,10 @@
         firebase.initializeApp(firebaseConfig);
         
         const ADMIN_PHONE = '6285849299253';
+        const WHAPI_TOKEN = 'dUtoaA65nf39YiR4oJweRlGP5fCPZXek';
         const DOKU_LINK = 'https://pay.doku.com/p-link/p/sidian';
+        
+        // ================== FUNGSI FORMAT ==================
         
         function formatPhoneNumber(phone) {
             let cleaned = phone.replace(/\D/g, '');
@@ -403,6 +446,13 @@
             if (!cleaned.startsWith('62')) {
                 return '62' + cleaned;
             }
+            return cleaned;
+        }
+        
+        function formatPhoneLocal(phone) {
+            if (!phone) return '';
+            let cleaned = phone.replace(/\D/g, '');
+            if (cleaned.startsWith('62')) return '0' + cleaned.substring(2);
             return cleaned;
         }
         
@@ -425,6 +475,229 @@
                 </div>
             `;
         }
+        
+        // ================== FUNGSI COPY KEY ==================
+        
+        window.copyKey = function(key) {
+            navigator.clipboard.writeText(key).then(() => {
+                showNotification('success', 'Berhasil', 'Key berhasil disalin!');
+                setTimeout(() => {
+                    document.getElementById('notificationArea').innerHTML = '';
+                }, 3000);
+            }).catch(() => {
+                alert('Key: ' + key);
+            });
+        };
+        
+        // ================== FUNGSI KEMBALI KE MENU ==================
+        
+        window.kembaliKeMenu = function() {
+            document.getElementById('mainMenu').classList.remove('hidden');
+            document.getElementById('trialArea').classList.add('hidden');
+            document.getElementById('trialArea').innerHTML = '';
+            document.getElementById('notificationArea').innerHTML = '';
+        };
+        
+        // ================== FUNGSI LUPA KEY (FITUR BARU) ==================
+        
+        window.showLupaKeyForm = function() {
+            const mainMenu = document.getElementById('mainMenu');
+            const trialArea = document.getElementById('trialArea');
+            
+            mainMenu.classList.add('hidden');
+            trialArea.classList.remove('hidden');
+            
+            trialArea.innerHTML = `
+                <h2 style="margin-bottom: 20px;">🔍 Cek Key Saya</h2>
+                <div class="trial-form">
+                    <h3>📱 Masukkan Nomor WhatsApp</h3>
+                    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">
+                        Masukkan nomor WA yang digunakan saat pembelian. 
+                        Kami akan menampilkan semua key aktif Anda.
+                    </p>
+                    
+                    <div class="form-group">
+                        <label>Nomor WhatsApp</label>
+                        <input type="tel" id="cekPhoneLupa" placeholder="Contoh: 081234567890">
+                        <div class="form-hint">Gunakan nomor yang terdaftar</div>
+                    </div>
+                    
+                    <button onclick="cekKeyByPhone()" class="btn btn-premium" id="cekBtnLupa">
+                        🔍 Cari Key Saya
+                    </button>
+                    
+                    <button onclick="kembaliKeMenu()" class="btn" style="background: #6c757d; margin-top: 10px;">
+                        ⬅️ Kembali
+                    </button>
+                </div>
+                <div id="lupaKeyResult" style="margin-top: 20px;"></div>
+            `;
+        };
+        
+        window.cekKeyByPhone = async function() {
+            const phoneInput = document.getElementById('cekPhoneLupa')?.value.trim();
+            
+            if (!phoneInput) {
+                alert('Masukkan nomor WhatsApp!');
+                return;
+            }
+            
+            // Format nomor ke 62 format
+            let cleanPhone = phoneInput.replace(/\D/g, '');
+            if (cleanPhone.startsWith('0')) {
+                cleanPhone = '62' + cleanPhone.substring(1);
+            } else if (!cleanPhone.startsWith('62')) {
+                cleanPhone = '62' + cleanPhone;
+            }
+            
+            const btn = document.getElementById('cekBtnLupa');
+            btn.disabled = true;
+            btn.textContent = '⏳ Mencari...';
+            
+            const resultDiv = document.getElementById('lupaKeyResult');
+            resultDiv.innerHTML = '<p style="text-align: center;">⏳ Memuat data...</p>';
+            
+            try {
+                // Cari semua key dengan nomor ini
+                const keysSnapshot = await firebase.database().ref('Keys')
+                    .orderByChild('customer_phone')
+                    .equalTo(cleanPhone)
+                    .once('value');
+                
+                const keys = keysSnapshot.val();
+                const now = Date.now();
+                
+                if (!keys) {
+                    resultDiv.innerHTML = `
+                        <div class="notification warning" style="margin-top: 15px;">
+                            <div class="notification-title">ℹ️ Tidak Ditemukan</div>
+                            <div class="notification-message">
+                                Tidak ada key dengan nomor ${phoneInput}.<br>
+                                Pastikan nomor yang dimasukkan benar.
+                            </div>
+                        </div>
+                    `;
+                    btn.disabled = false;
+                    btn.textContent = '🔍 Cari Key Saya';
+                    return;
+                }
+                
+                // Filter key yang masih aktif
+                const activeKeys = [];
+                const expiredKeys = [];
+                
+                Object.entries(keys).forEach(([keyId, keyData]) => {
+                    // Cek apakah key bertipe Duration (30 hari atau 3 hari)
+                    if (keyData.Type === 'Duration') {
+                        let duration = 30; // default 30 hari
+                        if (keyData.Value === '3d') duration = 3;
+                        
+                        const activatedAt = keyData.ActivatedAt || 0;
+                        const expiredAt = activatedAt + (duration * 24 * 60 * 60 * 1000);
+                        
+                        if (expiredAt > now) {
+                            // Masih aktif
+                            const daysLeft = Math.ceil((expiredAt - now) / (24 * 60 * 60 * 1000));
+                            activeKeys.push({
+                                key: keyId,
+                                activatedAt,
+                                expiredAt,
+                                daysLeft,
+                                invoice: keyData.generated_for || 'Tidak diketahui',
+                                isTrial: (keyData.Value === '3d'),
+                                source: keyData.source || 'premium'
+                            });
+                        } else {
+                            expiredKeys.push(keyId);
+                        }
+                    }
+                });
+                
+                // Urutkan dari yang terbaru
+                activeKeys.sort((a, b) => b.activatedAt - a.activatedAt);
+                
+                if (activeKeys.length === 0) {
+                    resultDiv.innerHTML = `
+                        <div class="notification warning" style="margin-top: 15px;">
+                            <div class="notification-title">⏳ Tidak Ada Key Aktif</div>
+                            <div class="notification-message">
+                                Tidak ditemukan key aktif untuk nomor ${phoneInput}.
+                                ${expiredKeys.length > 0 ? `<br>Ditemukan ${expiredKeys.length} key expired.` : ''}
+                            </div>
+                        </div>
+                    `;
+                    
+                    if (expiredKeys.length > 0) {
+                        resultDiv.innerHTML += `
+                            <details style="margin-top: 15px;">
+                                <summary style="color: #999; cursor: pointer;">📁 Lihat ${expiredKeys.length} key expired</summary>
+                                <div class="expired-list">
+                                    ${expiredKeys.map(k => `<div>${k}</div>`).join('')}
+                                </div>
+                            </details>
+                        `;
+                    }
+                } else {
+                    // Tampilkan key aktif
+                    let html = `
+                        <div class="notification success" style="margin-top: 15px;">
+                            <div class="notification-title">✅ Ditemukan ${activeKeys.length} Key Aktif</div>
+                        </div>
+                    `;
+                    
+                    activeKeys.forEach(k => {
+                        const startDate = new Date(k.activatedAt).toLocaleDateString('id-ID');
+                        const endDate = new Date(k.expiredAt).toLocaleDateString('id-ID');
+                        const trialBadge = k.isTrial ? '<span class="key-badge">TRIAL</span>' : '';
+                        
+                        html += `
+                            <div class="key-item">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <strong style="font-size: 16px;">${k.key}</strong>
+                                    ${trialBadge}
+                                </div>
+                                <div style="font-size: 13px; color: #666;">
+                                    <div>Aktif sejak: ${startDate}</div>
+                                    <div>Berlaku hingga: ${endDate}</div>
+                                    <div><strong>Sisa: ${k.daysLeft} hari</strong></div>
+                                    <div>Invoice: ${k.invoice}</div>
+                                </div>
+                                <button onclick="copyKey('${k.key}')" class="btn btn-copy" style="margin-top: 10px; padding: 8px; font-size: 14px;">
+                                    📋 Copy Key
+                                </button>
+                            </div>
+                        `;
+                    });
+                    
+                    if (expiredKeys.length > 0) {
+                        html += `
+                            <details style="margin-top: 15px;">
+                                <summary style="color: #999; cursor: pointer;">📁 ${expiredKeys.length} Key Expired</summary>
+                                <div class="expired-list">
+                                    ${expiredKeys.map(k => `<div>${k}</div>`).join('')}
+                                </div>
+                            </details>
+                        `;
+                    }
+                    
+                    resultDiv.innerHTML = html;
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <div class="notification error" style="margin-top: 15px;">
+                        <div class="notification-title">❌ Error</div>
+                        <div class="notification-message">${error.message}</div>
+                    </div>
+                `;
+            }
+            
+            btn.disabled = false;
+            btn.textContent = '🔍 Cari Key Saya';
+        };
+        
+        // ================== FUNGSI TRIAL (TETAP SAMA) ==================
         
         function handleTrialClick() {
             const params = new URLSearchParams(window.location.search);
@@ -552,6 +825,8 @@
                     expiresAt: expireDate.getTime()
                 });
                 
+                // HAPUS KODE WA DI SINI (sesuai permintaan sebelumnya)
+                
                 document.getElementById('trialArea').innerHTML = `
                     <div class="success-box">
                         <h3 style="color: #155724; margin-bottom: 15px;">✅ Key Trial Berhasil!</h3>
@@ -582,22 +857,6 @@
                 btn.disabled = false;
                 btn.textContent = '🔑 Generate Key Trial';
             }
-        };
-        
-        window.copyKey = function(key) {
-            navigator.clipboard.writeText(key).then(() => {
-                showNotification('success', 'Berhasil', 'Key berhasil disalin!');
-                setTimeout(() => {
-                    document.getElementById('notificationArea').innerHTML = '';
-                }, 3000);
-            });
-        };
-        
-        window.kembaliKeMenu = function() {
-            document.getElementById('mainMenu').classList.remove('hidden');
-            document.getElementById('trialArea').classList.add('hidden');
-            document.getElementById('trialArea').innerHTML = '';
-            document.getElementById('notificationArea').innerHTML = '';
         };
         
         window.handleLogoError = function() {
